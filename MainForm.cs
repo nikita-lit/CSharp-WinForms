@@ -426,14 +426,10 @@ namespace WinFormsUlesanne
             if (RadioBtn1.Checked)
             {
                 BackColor = Color.Black;
-                RadioBtn2.ForeColor = Color.White;
-                RadioBtn1.ForeColor = Color.White;
             }
             else if (RadioBtn2.Checked)
             {
                 BackColor = Color.White;
-                RadioBtn2.ForeColor = Color.Black;
-                RadioBtn1.ForeColor = Color.Black;
             }
         }
     }
