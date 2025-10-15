@@ -1,6 +1,6 @@
 namespace WinFormsUlesanne
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         public TreeView Tree;
         public PictureBox Picture;
@@ -8,7 +8,7 @@ namespace WinFormsUlesanne
         public RadioButton RadioBtn1, RadioBtn2;
         public TabControl TabControl;
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
 
@@ -41,34 +41,34 @@ namespace WinFormsUlesanne
             CheckBox1 = new CheckBox();
             CheckBox1.Text = "Pilt 1";
             CheckBox1.Size = new Size(100, 20);
-            CheckBox1.Location = new Point(160, 20);
+            CheckBox1.Location = new Point(160, 30);
             CheckBox1.CheckedChanged += CheckBox_CheckedChanged;
 
             CheckBox2 = new CheckBox();
             CheckBox2.Text = "Pilt 2";
             CheckBox2.Size = new Size(100, 20);
-            CheckBox2.Location = new Point(160, 40);
+            CheckBox2.Location = new Point(160, 50);
             CheckBox2.CheckedChanged += CheckBox_CheckedChanged;
 
             CheckBox3 = new CheckBox();
             CheckBox3.Text = "Pilt 3";
             CheckBox3.Size = new Size(100, 20);
-            CheckBox3.Location = new Point(160, 60);
+            CheckBox3.Location = new Point(160, 70);
             CheckBox3.CheckedChanged += CheckBox_CheckedChanged;
 
             CheckBox4 = new CheckBox();
             CheckBox4.Text = "Pilt 4";
             CheckBox4.Size = new Size(100, 20);
-            CheckBox4.Location = new Point(160, 80);
+            CheckBox4.Location = new Point(160, 90);
             CheckBox4.CheckedChanged += CheckBox_CheckedChanged;
 
             RadioBtn1 = new RadioButton();
             RadioBtn1.Text = "Must teema";
-            RadioBtn1.Location = new Point(170, 20);
+            RadioBtn1.Location = new Point(170, 30);
 
             RadioBtn2 = new RadioButton();
             RadioBtn2.Text = "Valge teema";
-            RadioBtn2.Location = new Point(170, 40);
+            RadioBtn2.Location = new Point(170, 50);
             RadioBtn1.CheckedChanged += RadioBtn_CheckedChanged;
             RadioBtn2.CheckedChanged += RadioBtn_CheckedChanged;
 
@@ -78,12 +78,12 @@ namespace WinFormsUlesanne
             ToolStripMenuItem fileMenu = new ToolStripMenuItem("Fail");
 
             ToolStripMenuItem showMsgItem = new ToolStripMenuItem("Abi");
-            showMsgItem.Click += (s, e) => {
+            showMsgItem.Click += (sender, e) => {
                 MessageBox.Show("Tere! Abi ei ole!", "Info");
             };
 
             ToolStripMenuItem closeItem = new ToolStripMenuItem("Välja");
-            closeItem.Click += (s, e) => {
+            closeItem.Click += (sender, e) => {
                 Close();
             };
 
@@ -141,6 +141,24 @@ namespace WinFormsUlesanne
             Picture.Image = Image.FromFile(@"..\..\..\Images\" + fail);
         }
 
+        private TabPage CreateTabPage(string title)
+        {
+            var tab = new TabPage(title);
+
+            Button remBut = new Button();
+            remBut.Text = "Eemalda leht";
+            remBut.Location = new Point(10, 10);
+            remBut.Size = new Size(90, 30);
+            remBut.TextAlign = ContentAlignment.MiddleCenter;
+            remBut.Click += (sender, ev) => {
+                if (TabControl.TabPages.Count > 0)
+                    TabControl.TabPages.RemoveAt(TabControl.SelectedIndex);
+            };
+            tab.Controls.Add(remBut);
+
+            return tab;
+        }
+
         private void Tree_AfterSelect(object sender, TreeViewEventArgs e)
         {
             Controls.Clear();
@@ -163,48 +181,41 @@ namespace WinFormsUlesanne
                     Controls.Add(RadioBtn2);
                     break;
                 case "MessageBox":
-                    var answer = MessageBox.Show("Kas sul on kass?", "Küsimus", MessageBoxButtons.YesNo);
+                    var answer = MessageBox.Show("Küsimus?", "Küsimus", MessageBoxButtons.YesNo);
                     if (answer == DialogResult.Yes)
                         MessageBox.Show("Väga hea", "Küsimus", MessageBoxButtons.OK);
                     break;
                 case "TabControl":
                     TabControl = new TabControl();
-                    TabControl.Location = new Point(170, 20);
+                    TabControl.Location = new Point(170, 30);
                     TabControl.Size = new Size(400, 300);
 
-                    var tab1 = new TabPage("Esimene leht");
-                    var tab2 = new TabPage("Teine leht");
+                    TabControl.TabPages.Add(CreateTabPage("Tab 1"));
+                    TabControl.TabPages.Add(CreateTabPage("Tab 2"));
 
-                    Label tab2Label = new Label();
-                    tab2Label.Text = "See on teine vaheleht";
-                    tab2Label.AutoSize = true;
-                    tab2Label.Location = new Point(20, 20);
-                    tab2.Controls.Add(tab2Label);
-
-                    TabControl.TabPages.Add(tab1);
-                    TabControl.TabPages.Add(tab2);
-
-                    Button removeTabButton = new Button();
-                    removeTabButton.Text = "Eemalda leht";
-                    removeTabButton.Location = new Point(20, 20);
-                    removeTabButton.Size = new Size(90, 30);
-                    removeTabButton.TextAlign = ContentAlignment.MiddleCenter;
-                    removeTabButton.Click += (s, ev) => {
-                        if (TabControl.TabPages.Count > 0)
-                            TabControl.TabPages.RemoveAt(TabControl.SelectedIndex);
+                    var tabAdd = new TabPage("+");
+                    TabControl.Selected += (sender, e) => {
+                        if (e.TabPage == tabAdd)
+                        {
+                            string title = "Tab " + (TabControl.TabPages.Count).ToString();
+                            TabPage newTab = CreateTabPage(title);
+                            TabControl.TabPages.Add(newTab);
+                            TabControl.TabPages.Remove(tabAdd);
+                            TabControl.TabPages.Add(tabAdd);
+                            TabControl.SelectedTab = newTab;
+                        }
                     };
-                    tab1.Controls.Add(removeTabButton);
 
+                    TabControl.TabPages.Add(tabAdd);
                     Controls.Add(TabControl);
                     break;
                 case "ListBox":
                     ListBox listBox = new ListBox();
-                    listBox.Location = new Point(170, 20);
+                    listBox.Location = new Point(170, 30);
                     listBox.Size = new Size(120, 150);
 
                     listBox.Items.AddRange([ "Punane", "Roheline", "Sinine", "Kollane", "Hall" ]);
-                    listBox.SelectedIndexChanged += (s, ev) =>
-                    {
+                    listBox.SelectedIndexChanged += (sender, ev) => {
                         switch (listBox.SelectedItem.ToString())
                         {
                             case "Punane": BackColor = Color.Red; break;
