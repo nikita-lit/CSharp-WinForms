@@ -13,14 +13,12 @@
             Width = 300;
             Text = "Vorm valik";
 
-            Panel butsPanel = new Panel()
-            {
+            Panel butsPanel = new Panel() {
                 Dock = DockStyle.Fill,
                 Padding = new Padding(30)
             };
 
-            Button but = new Button() 
-            {
+            Button but = new Button()  {
                 Text = "Vorm 1",
                 Size = new Size(200, 30),
                 Dock = DockStyle.Top,
@@ -31,8 +29,7 @@
                 Hide();
             };
 
-            Button but2 = new Button()
-            {
+            Button but2 = new Button() {
                 Text = "Vorm 2",
                 Size = new Size(200, 30),
                 Dock = DockStyle.Top,
@@ -43,8 +40,7 @@
                 Hide();
             };
 
-            Button but3 = new Button() 
-            {
+            Button but3 = new Button() {
                 Text = "Vorm 3",
                 Size = new Size(200, 30),
                 Dock = DockStyle.Top,
