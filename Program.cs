@@ -17,5 +17,7 @@ namespace WinFormsUlesanne
             ApplicationConfiguration.Initialize();
             Application.Run(new PictureViewer());
         }
+
+        public static string GetDirectory() => AppDomain.CurrentDomain.BaseDirectory;
     }
 }
