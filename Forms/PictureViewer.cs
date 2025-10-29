@@ -1,7 +1,11 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Text.Json;
+using System.Windows.Forms;
 
-namespace WinFormsUlesanne
+namespace WinForms
 {
     public class PictureData
     {
@@ -22,13 +26,13 @@ namespace WinFormsUlesanne
     {
         public PictureData Data;
         public TabPage TabPage;
-        public PictureBox Picture;
+        public PictureView Picture;
         public ScrollableControl Scroll;
 
         public PictureTab(
             PictureData data, 
-            TabPage tab, 
-            PictureBox pic, 
+            TabPage tab,
+            PictureView pic, 
             ScrollableControl scroll)
         {
             Data = data;
@@ -38,10 +42,12 @@ namespace WinFormsUlesanne
             Picture.SizeMode = PictureBoxSizeMode.StretchImage;
         }
 
-        public void UpdateSizeMode(bool strech, float zoom)
+        public void Update(bool strech, float zoom, bool isPixelated)
         {
             Scroll.VerticalScroll.Value = 0;
             Scroll.HorizontalScroll.Value = 0;
+
+            Picture.IsPixelated = isPixelated;
 
             if (strech)
                 Picture.Size = Scroll.Size;
@@ -58,11 +64,23 @@ namespace WinFormsUlesanne
         private ToolStripMenuItem _fileMenu;
         private TabControl _tabControl;
         private ContextMenuStrip _tabContextMenu;
-        private CheckBox _strechCBox;
 
-        private float _zoom = 1.5f;
+        private bool _strechEnabled = false;
+        private bool _pixelationEnabled = false;
+
+        private ToolStripMenuItem _strechItem;
+        private CheckBox _strechBox;
+
+        private ToolStripMenuItem _pixelItem;
+        private CheckBox _pixelBox;
+
+        private ToolStripMenuItem _zoomItem;
+        private Label _zoomLabel;
+        private float _zoom = 1.0f;
+        private List<int> _zoomPercs = new() { 25, 50, 75, 100, 125, 150, 175, 200, 300 };
+
+        private ToolStripMenuItem _bgColorItem;
         private Color _bgColor = Color.Gray;
-        private bool ImageStrech => _strechCBox.Checked;
 
         public PictureTab GetCurrentPictureTab()
         {
@@ -85,11 +103,13 @@ namespace WinFormsUlesanne
             Height = 800;
             Width = 1280;
             Text = "Picture Viewer";
+            BackColor = _bgColor;
 
             _butsPanel = new Panel() {
                 Size = new Size(Width, 50),
                 Dock = DockStyle.Bottom,
                 Padding = new Padding(10),
+                BackColor = Color.White,
             };
 
             InitTabControl();
@@ -162,6 +182,12 @@ namespace WinFormsUlesanne
             _tabControl.TabPages.RemoveAt(index);
         }
 
+        private void UpdateCurrentTab()
+        {
+            var tab = GetCurrentPictureTab();
+            tab?.Update(_strechEnabled, _zoom, _pixelationEnabled);
+        }
+
         private void LoadHistory()
         {
             try
@@ -171,7 +197,8 @@ namespace WinFormsUlesanne
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "History loading error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (ex is not FileNotFoundException)
+                    MessageBox.Show(ex.ToString(), "History loading error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -211,12 +238,43 @@ namespace WinFormsUlesanne
 
             //-------------------------------------
             ToolStripMenuItem viewMenu = new ToolStripMenuItem("View");
-            ToolStripMenuItem bgColorItem = new ToolStripMenuItem("Set Background Color");
-            bgColorItem.Click += (sender, e) => {
+            _bgColorItem = new ToolStripMenuItem("Set Background Color");
+            _bgColorItem.Click += (sender, e) => {
                 AskToChangeBgColor();
             };
 
-            viewMenu.DropDownItems.Add(bgColorItem);
+            UpdateToolStripItemColor();
+            viewMenu.DropDownItems.Add(_bgColorItem);
+
+            ToolStripSeparator sep = new ToolStripSeparator();
+            viewMenu.DropDownItems.Add(sep);
+
+            _strechItem = new ToolStripMenuItem("Strech");
+            _strechItem.CheckOnClick = true;
+            _strechItem.CheckedChanged += Strech_CheckedChanged;
+
+            _pixelItem = new ToolStripMenuItem("Pixelation");
+            _pixelItem.CheckOnClick = true;
+            _pixelItem.CheckedChanged += Pixelation_CheckedChanged;
+
+            viewMenu.DropDownItems.Add(_strechItem);
+            viewMenu.DropDownItems.Add(_pixelItem);
+
+            ToolStripSeparator sep2 = new ToolStripSeparator();
+            viewMenu.DropDownItems.Add(sep2);
+
+            _zoomItem = new ToolStripMenuItem($"Zoom {_zoomPerc}%");
+            foreach (int perc in _zoomPercs)
+            {
+                ToolStripMenuItem zoomPerc = new ToolStripMenuItem($"{perc}%");
+                zoomPerc.Click += (sender, e) => {
+                    SetZoomPercentage(perc);
+                };
+
+                _zoomItem.DropDownItems.Add(zoomPerc);
+            }
+
+            viewMenu.DropDownItems.Add(_zoomItem);
 
             //-------------------------------------
             menu.Items.Add(_fileMenu);
@@ -225,6 +283,50 @@ namespace WinFormsUlesanne
 
             Controls.Add(menu);
             MainMenuStrip = menu;
+        }
+
+        private void Pixelation_CheckedChanged(object sender, EventArgs e)
+        {
+            bool pixel = false;
+
+            if (sender == _pixelBox)
+            {
+                pixel = _pixelBox.Checked;
+                if (_pixelItem.Checked != pixel)
+                    _pixelItem.Checked = pixel;
+            }
+            else if (sender == _pixelItem)
+            {
+                pixel = _pixelItem.Checked;
+                if (_pixelBox.Checked != pixel)
+                    _pixelBox.Checked = pixel;
+            }
+
+            _pixelationEnabled = pixel;
+
+            UpdateCurrentTab();
+        }
+
+        private void Strech_CheckedChanged(object sender, EventArgs e)
+        {
+            bool strech = false;
+
+            if (sender == _strechBox)
+            {
+                strech = _strechBox.Checked;
+                if (_strechItem.Checked != strech)
+                    _strechItem.Checked = strech;
+            }
+            else if (sender == _strechItem)
+            {
+                strech = _strechItem.Checked;
+                if (_strechBox.Checked != strech)
+                    _strechBox.Checked = strech;
+            }
+
+            _strechEnabled = strech;
+
+            UpdateCurrentTab();
         }
 
         private void LoadFileMenu()
@@ -259,10 +361,10 @@ namespace WinFormsUlesanne
             revHis.Reverse();
 
             int num = 1;
-            foreach (string path in revHis.GetRange(0, 10))
+            foreach (string path in revHis.GetRange(0, Math.Min(revHis.Count, 10)))
             {
                 ToolStripMenuItem hisItem = new ToolStripMenuItem($"{num}: {path}");
-                hisItem.Click += (sender, e) => {
+                hisItem.Click += (sendSer, e) => {
                     LoadImage(path);
                 };
 
@@ -271,8 +373,11 @@ namespace WinFormsUlesanne
                 num++;
             }
 
-            ToolStripSeparator sep2 = new ToolStripSeparator();
-            _fileMenu.DropDownItems.Add(sep2);
+            if (revHis.Count > 0)
+            {
+                ToolStripSeparator sep2 = new ToolStripSeparator();
+                _fileMenu.DropDownItems.Add(sep2);
+            }
 
             //-------------------------------------
             ToolStripMenuItem exitItem = new ToolStripMenuItem("Exit");
@@ -293,7 +398,7 @@ namespace WinFormsUlesanne
             scroll.BackColor = _bgColor;
             scroll.Dock = DockStyle.Fill;
 
-            PictureBox pic = new PictureBox();
+            PictureView pic = new PictureView();
             pic.BackColor = Color.Transparent;
             pic.SizeMode = PictureBoxSizeMode.Normal;
             pic.Size = new Size(data.Image.Width, data.Image.Height);
@@ -305,18 +410,15 @@ namespace WinFormsUlesanne
 
             _tabControl.TabPages.Add(tab);
             _tabControl.SelectedTab = tab;
-
-            SetZoom(2f);
         }
 
         private void InitTabControl()
         {
             _tabControl = new TabControl();
             _tabControl.Dock = DockStyle.Fill;
-            _tabControl.BackColor = Color.Red;
+            _tabControl.BackColor = Color.White;
             _tabControl.SizeChanged += (sender, e) => {
-                var tab = GetCurrentPictureTab();
-                tab?.UpdateSizeMode(ImageStrech, _zoom);
+                UpdateCurrentTab();
             };
             _tabControl.SelectedIndexChanged += (sender, e) => {
                 OnTabChanged();
@@ -329,6 +431,10 @@ namespace WinFormsUlesanne
             ToolStripMenuItem openExplorer = new ToolStripMenuItem("Open in File Explorer");
 
             _tabContextMenu.Items.Add(close);
+
+            ToolStripSeparator sep = new ToolStripSeparator();
+            _tabContextMenu.Items.Add(sep);
+
             _tabContextMenu.Items.Add(open);
             _tabContextMenu.Items.Add(openExplorer);
 
@@ -348,6 +454,7 @@ namespace WinFormsUlesanne
                     Process.Start("explorer.exe", $"/select, {filePath}");
             };
 
+            _tabControl.Visible = false;
             Controls.Add(_tabControl);
         }
 
@@ -356,54 +463,98 @@ namespace WinFormsUlesanne
             var tab = GetCurrentPictureTab();
             if (tab != null)
             {
-                tab.UpdateSizeMode(ImageStrech, _zoom);
+                tab.Update(_strechEnabled, _zoom, _pixelationEnabled);
                 Text = "Picture Viewer - " + Path.GetFileName(tab.Data.FilePath);
+                _tabControl.Visible = true;
             }
             else
             {
                 Text = "Picture Viewer";
-                _strechCBox.Checked = false;
+                _tabControl.Visible = false;
             }
+
+            if (_tabControl.Visible)
+                BackColor = Color.White;
+            else
+                BackColor = _bgColor;
         }
 
         private void InitCheckBox()
         {
-            _strechCBox = new CheckBox()
+            _strechBox = new CheckBox()
             {
                 Text = "Stretch",
                 Dock = DockStyle.Left,
             };
-            _strechCBox.CheckedChanged += (sender, e) => {
-                var tab = GetCurrentPictureTab();
-                if (tab != null)
-                    tab.UpdateSizeMode(ImageStrech, _zoom);
+            _strechBox.CheckedChanged += Strech_CheckedChanged;
+            _butsPanel.Controls.Add(_strechBox);
+
+            _pixelBox = new CheckBox()
+            {
+                Text = "Pixelation",
+                Dock = DockStyle.Left,
             };
-            _butsPanel.Controls.Add(_strechCBox);
+            _pixelBox.CheckedChanged += Pixelation_CheckedChanged;
+            _butsPanel.Controls.Add(_pixelBox);
         }
 
         private void InitButtons()
         {
-            //Button showBut = new Button()
-            //{
-            //    Text = "Show a picture",
-            //    Dock = DockStyle.Right,
-            //    AutoSize = true,
-            //};
-            //showBut.Click += ShowBut_Click;
-            //_butsPanel.Controls.Add(showBut);
+            Button zoom1 = new Button()
+            {
+                Text = "Zoom In",
+                Dock = DockStyle.Right,
+                AutoSize = true,
+            };
+            zoom1.Click += (sender, e) => {
+                int index = _zoomPercs.IndexOf(_zoomPerc) + 1;
+                if (index > -1 && index < _zoomPercs.Count)
+                    SetZoomPercentage(_zoomPercs[index]);
+            };
+
+            Button zoom2 = new Button()
+            {
+                Text = "Zoom Out",
+                Dock = DockStyle.Right,
+                AutoSize = true,
+            };
+            zoom2.Click += (sender, e) => {
+                int index = _zoomPercs.IndexOf(_zoomPerc) + -1;
+                if (index > -1 &&  index < _zoomPercs.Count)
+                    SetZoomPercentage(_zoomPercs[index]);
+            };
+
+            _zoomLabel = new Label()
+            {
+                Text = $"{_zoomPerc}%",
+                TextAlign = ContentAlignment.MiddleCenter,
+                Dock = DockStyle.Right,
+                Width = 40,
+            };
+            
+            _butsPanel.Controls.Add(_zoomLabel);
+            _butsPanel.Controls.Add(zoom1);
+            _butsPanel.Controls.Add(zoom2);
         }
 
-        private void SetZoom(float zoom)
-        {
-            if (ImageStrech) return;
+        private int _zoomPerc = 100;
 
-            _zoom = zoom;
+        private void SetZoomPercentage(int percent)
+        {
+            _zoomPerc = percent;
+            _zoomPerc = Math.Clamp(_zoomPerc, 10, 400);
+            _zoomItem.Text = $"Zoom {_zoomPerc}%";
+            _zoomLabel.Text = $"{_zoomPerc}%";
+            SetZoom(_zoomPerc);
+        }
+
+        private void SetZoom(int percent)
+        {
+            _zoom = (percent / 100.0f);
             foreach (TabPage tab in _tabControl.TabPages)
             {
                 var picTab = tab.Tag as PictureTab;
-                var width = (int)((float)picTab.Data.Image.Width * _zoom);
-                var height = (int)((float)picTab.Data.Image.Height * _zoom);
-                picTab.Picture.Size = new Size(width, height);
+                picTab.Update(_strechEnabled, _zoom, _pixelationEnabled);
             }
         }
 
@@ -416,11 +567,28 @@ namespace WinFormsUlesanne
             }
         }
 
+        private void UpdateToolStripItemColor()
+        {
+            _bgColorItem.Image?.Dispose();
+
+            var bmp = new Bitmap(16, 16);
+            using (Graphics g = Graphics.FromImage(bmp))
+                g.Clear(_bgColor);
+
+            _bgColorItem.Image = bmp;
+        }
+
         private void AskToChangeBgColor()
         {
             if (_colorDialog.ShowDialog() == DialogResult.OK)
             {
                 _bgColor = _colorDialog.Color;
+                if (_tabControl.Visible)
+                    BackColor = Color.White;
+                else
+                    BackColor = _bgColor;
+
+                UpdateToolStripItemColor();
                 foreach (TabPage tab in _tabControl.TabPages)
                 {
                     var picTab = tab.Tag as PictureTab;
@@ -440,6 +608,7 @@ namespace WinFormsUlesanne
                     {
                         _tabContextMenu.Tag = i;
                         _tabContextMenu.Show(_tabControl, e.Location);
+                        _tabControl.SelectedIndex = i;
                         break;
                     }
                 }

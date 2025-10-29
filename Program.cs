@@ -1,4 +1,4 @@
-namespace WinFormsUlesanne
+namespace WinForms
 {
     internal static class Program
     {

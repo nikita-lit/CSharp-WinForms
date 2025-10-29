@@ -1,4 +1,4 @@
-﻿namespace WinFormsUlesanne
+﻿namespace WinForms
 {
     public partial class MainForm : Form
     {
