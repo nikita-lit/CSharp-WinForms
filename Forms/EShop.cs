@@ -85,7 +85,7 @@ namespace WinForms
             _openFileDialog.InitialDirectory = @"C:\Users\opilane\Pictures";
             _openFileDialog.Multiselect = true;
             _openFileDialog.Filter = "Images Files(*.jpeg;*.bmp;*.png;*.jpg)|*.jpeg;*.bmp;*.png;*.jpg";
-            string product = "test";
+            string product = _textProductName.Text;
 
             FileInfo openInfo = new(@"C:\Users\opilane\Pictures" + _openFileDialog.FileName);
             if (_openFileDialog.ShowDialog() == DialogResult.OK && product != null)

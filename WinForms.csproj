@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <None Update="Databases\EShopDB.mdf">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
