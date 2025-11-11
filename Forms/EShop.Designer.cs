@@ -190,6 +190,7 @@
             _butRemoveProductCategory.TabIndex = 16;
             _butRemoveProductCategory.Text = "Kustuta kategooriat";
             _butRemoveProductCategory.UseVisualStyleBackColor = true;
+            _butRemoveProductCategory.Click += _butRemoveProductCategory_Click;
             // 
             // _butFindFile
             // 
@@ -199,6 +200,7 @@
             _butFindFile.TabIndex = 17;
             _butFindFile.Text = "Otsi fail";
             _butFindFile.UseVisualStyleBackColor = true;
+            _butFindFile.Click += _butFindFile_Click;
             // 
             // EShop
             // 
