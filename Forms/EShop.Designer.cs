@@ -58,6 +58,8 @@
             _dataGridView1.Name = "_dataGridView1";
             _dataGridView1.Size = new Size(845, 239);
             _dataGridView1.TabIndex = 0;
+            _dataGridView1.CellMouseEnter += _dataGridView1_CellMouseEnter;
+            _dataGridView1.CellMouseLeave += _dataGridView1_CellMouseLeave;
             // 
             // _pbProductImage
             // 
@@ -75,6 +77,7 @@
             _butAddProduct.TabIndex = 2;
             _butAddProduct.Text = "Lisa";
             _butAddProduct.UseVisualStyleBackColor = true;
+            _butAddProduct.Click += _butAddProduct_Click;
             // 
             // _butRemoveProduct
             // 

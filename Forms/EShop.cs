@@ -13,6 +13,9 @@ namespace WinForms
             string folder = Path.Combine(Environment.CurrentDirectory, "Databases");
             Directory.CreateDirectory(folder);
 
+            string folder2 = Path.Combine(Environment.CurrentDirectory, "Images");
+            Directory.CreateDirectory(folder2);
+
             CreateDatabase();
             InitializeComponent();
 
@@ -22,23 +25,28 @@ namespace WinForms
             UpdateCategories();
         }
 
+        private void LoadDefaultImage()
+        {
+            _pbProductImage.Image = Image.FromFile(Path.Combine(Path.GetFullPath(@"..\..\..\Images"), "shop.png"));
+        }
+
         private void CreateDatabase()
         {
             _connect.Open();
 
             string product = "CREATE TABLE IF NOT EXISTS Product ( "
-                + "Id int NOT NULL PRIMARY KEY, "
+                + "Id integer NOT NULL PRIMARY KEY AUTOINCREMENT, "
                 + "Name varchar(50) NOT NULL, "
-                + "Count int NOT NULL, "
+                + "Count integer NOT NULL, "
                 + "Price float NOT NULL, "
                 + "Image varchar(100), "
                 + "BinImage blob, "
-                + "ProductCategoryId int, "
+                + "ProductCategoryId integer, "
                 + "FOREIGN KEY(ProductCategoryId) REFERENCES ProductCategory(Id)"
                 + " )";
 
             string productCategory = "CREATE TABLE IF NOT EXISTS ProductCategory ( "
-                + "Id int NOT NULL PRIMARY KEY, "
+                + "Id integer NOT NULL PRIMARY KEY AUTOINCREMENT, "
                 + "Name varchar(50) NOT NULL, "
                 + "Description varchar(200)"
                 + " )";
@@ -47,6 +55,10 @@ namespace WinForms
             _command.ExecuteNonQuery();
 
             _command = new SqliteCommand(productCategory, _connect);
+            _command.ExecuteNonQuery();
+
+            string catData = "INSERT INTO ProductCategory (Name) VALUES ('Leib'), ('Köögiviljad'), ('Puuviljad'), ('Elektroonika');";
+            _command = new SqliteCommand(catData, _connect);
             _command.ExecuteNonQuery();
 
             _connect.Close();
@@ -69,7 +81,7 @@ namespace WinForms
             _dataGridView1.Columns.Clear();
             _dataGridView1.DataSource = dt;
             DataGridViewComboBoxColumn comboBox = new();
-            comboBox.DataPropertyName = "ProductCategory";
+            comboBox.DataPropertyName = "ProductCategoryId";
             HashSet<string> keys = new();
 
             foreach (DataRow row in dt.Rows)
@@ -83,7 +95,7 @@ namespace WinForms
             }
 
             _dataGridView1.Columns.Add(comboBox);
-            _pbProductImage.Image = Image.FromFile(Path.Combine(Path.GetFullPath(@"..\..\..\Images"), "shop.png"));
+            LoadDefaultImage();
             _connect.Close();
         }
 
@@ -113,27 +125,27 @@ namespace WinForms
             _connect.Close();
         }
 
-        private Form _popupForm;
+        private Form _formPopup;
 
         private void CreateImage(Image image, int r)
         {
-            _popupForm = new Form();
-            _popupForm.FormBorderStyle = FormBorderStyle.None;
-            _popupForm.StartPosition = FormStartPosition.Manual;
-            _popupForm.Size = new Size(200, 200);
+            _formPopup = new Form();
+            _formPopup.FormBorderStyle = FormBorderStyle.None;
+            _formPopup.StartPosition = FormStartPosition.Manual;
+            _formPopup.Size = new Size(200, 200);
 
             PictureBox pic = new();
             pic.Image = image;
             pic.Dock = DockStyle.Fill;
             pic.SizeMode = PictureBoxSizeMode.Zoom;
 
-            _popupForm.Controls.Add(pic);
+            _formPopup.Controls.Add(pic);
 
             Rectangle rect = _dataGridView1.GetCellDisplayRectangle(4, r, true);
             Point popupPos = _dataGridView1.PointToScreen(rect.Location);
 
-            _popupForm.Location = new Point(popupPos.X + rect.Width, popupPos.Y);
-            _popupForm.Show();
+            _formPopup.Location = new Point(popupPos.X + rect.Width, popupPos.Y);
+            _formPopup.Show();
         }
 
         private void _butAddProductCategory_Click(object sender, EventArgs e)
@@ -177,24 +189,25 @@ namespace WinForms
 
         private SaveFileDialog _saveFileDialog;
         private OpenFileDialog _openFileDialog;
+        private string _extension = null;
 
         private void _butFindFile_Click(object sender, EventArgs e)
         {
-            _openFileDialog = new OpenFileDialog();
+            _openFileDialog = new();
             _openFileDialog.InitialDirectory = @"C:\Users\opilane\Pictures";
             _openFileDialog.Multiselect = true;
-            _openFileDialog.Filter = "Images Files(*.jpeg;*.bmp;*.png;*.jpg)|*.jpeg;*.bmp;*.png;*.jpg";
+            _openFileDialog.Filter = "Images Files (*.jpeg;*.bmp;*.png;*.jpg)|*.jpeg;*.bmp;*.png;*.jpg";
             string product = _textProductName.Text;
 
             FileInfo openInfo = new(@"C:\Users\opilane\Pictures" + _openFileDialog.FileName);
             if (_openFileDialog.ShowDialog() == DialogResult.OK && product != null)
             {
-                _saveFileDialog = new SaveFileDialog();
-                _saveFileDialog.InitialDirectory = Path.GetFullPath(@"..\..\Images");
+                _saveFileDialog = new();
+                _saveFileDialog.InitialDirectory = Path.Combine(Environment.CurrentDirectory, "Images");
 
-                string ext = Path.GetExtension(_openFileDialog.FileName);
-                _saveFileDialog.FileName = product + ext;
-                _saveFileDialog.Filter = "Images" + ext + "|" + ext;
+                _extension = Path.GetExtension(_openFileDialog.FileName);
+                _saveFileDialog.FileName = product + _extension;
+                _saveFileDialog.Filter = "Images" + _extension + "|" + _extension;
 
                 if (_saveFileDialog.ShowDialog() == DialogResult.OK && product != null)
                 {
@@ -204,6 +217,74 @@ namespace WinForms
             }
             else
                 MessageBox.Show("Puudub toode nimetus või oli vajatud Cancel");
+        }
+
+        private byte[] _imageData;
+
+        private void _dataGridView1_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex == 4)
+            {
+                _imageData = _dataGridView1.Rows[e.RowIndex].Cells["BinImage"].Value as byte[];
+                if (_imageData != null)
+                {
+                    using (MemoryStream ms = new MemoryStream(_imageData))
+                    {
+                        Image image = Image.FromStream(ms);
+                        CreateImage(image, e.RowIndex);
+                    }
+                }
+            }
+        }
+
+        private void _dataGridView1_CellMouseLeave(object sender, DataGridViewCellEventArgs e)
+        {
+            if (_formPopup != null && !_formPopup.IsDisposed)
+            {
+                _formPopup.Close();
+            }
+        }
+
+        private void _butAddProduct_Click(object sender, EventArgs e)
+        {
+            string name = _textProductName.Text.Trim();
+            decimal count = _numProductCount.Value;
+            decimal price = _numProductPrice.Value;
+            int cat = _cbProductCategory.SelectedIndex;
+
+            bool valid = !string.IsNullOrEmpty(name) && cat >= 0;
+
+            if (valid)
+            {
+                try
+                {
+                    _connect.Open();
+
+                    string query = "INSERT INTO Product (Name, Count, Price, Image, BinImage, ProductCategoryId) VALUES "
+                    + "(@name, @count, @price, @image, @binimage, @cat)";
+
+                    _command = new SqliteCommand(query, _connect);
+                    _command.Parameters.AddWithValue("@name", name);
+                    _command.Parameters.AddWithValue("@count", count);
+                    _command.Parameters.AddWithValue("@price", price);
+                    _command.Parameters.AddWithValue("@image", name + _extension);
+
+                    var byteData = File.ReadAllBytes(_openFileDialog.FileName);
+                    _command.Parameters.AddWithValue("@binimage", byteData);
+                    _command.Parameters.AddWithValue("@cat", cat);
+
+                    _command.ExecuteNonQuery();
+                    _connect.Close();
+
+                    UpdateData();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Andmebaasiga VIGA! " + ex.Message);
+                }
+            }
+            else
+                MessageBox.Show("Vale andmed!");
         }
     }
 }
