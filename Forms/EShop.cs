@@ -6,7 +6,7 @@ namespace WinForms
     public partial class EShop : Form
     {
         private SqliteCommand _command;
-        private SqliteConnection _connect = new(@"Data Source=Databases/EShop.db;");
+        private SqliteConnection _connect;
 
         public EShop()
         {
@@ -18,6 +18,8 @@ namespace WinForms
 
             CreateDatabase();
             InitializeComponent();
+
+            Text = "E-pood";
 
             _pbProductImage.SizeMode = PictureBoxSizeMode.StretchImage;
 
@@ -32,6 +34,7 @@ namespace WinForms
 
         private void CreateDatabase()
         {
+            _connect = new(@"Data Source=Databases/EShop.db;");
             _connect.Open();
 
             string product = "CREATE TABLE IF NOT EXISTS Product ( "
@@ -80,6 +83,8 @@ namespace WinForms
 
             _dataGridView1.Columns.Clear();
             _dataGridView1.DataSource = dt;
+
+            /*
             DataGridViewComboBoxColumn comboBox = new();
             comboBox.DataPropertyName = "ProductCategoryId";
             HashSet<string> keys = new();
@@ -94,7 +99,7 @@ namespace WinForms
                 }
             }
 
-            _dataGridView1.Columns.Add(comboBox);
+            _dataGridView1.Columns.Add(comboBox);*/
             LoadDefaultImage();
             _connect.Close();
         }
@@ -141,7 +146,7 @@ namespace WinForms
 
             _formPopup.Controls.Add(pic);
 
-            Rectangle rect = _dataGridView1.GetCellDisplayRectangle(4, r, true);
+            Rectangle rect = _dataGridView1.GetCellDisplayRectangle(5, r, true);
             Point popupPos = _dataGridView1.PointToScreen(rect.Location);
 
             _formPopup.Location = new Point(popupPos.X + rect.Width, popupPos.Y);
@@ -223,7 +228,7 @@ namespace WinForms
 
         private void _dataGridView1_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex == 4)
+            if (e.RowIndex >= 0 && e.ColumnIndex == 5)
             {
                 _imageData = _dataGridView1.Rows[e.RowIndex].Cells["BinImage"].Value as byte[];
                 if (_imageData != null)
@@ -251,8 +256,18 @@ namespace WinForms
             decimal count = _numProductCount.Value;
             decimal price = _numProductPrice.Value;
             int cat = _cbProductCategory.SelectedIndex;
+            byte[] imageBytes = null;
 
-            bool valid = !string.IsNullOrEmpty(name) && cat >= 0;
+            try
+            {
+                imageBytes = File.ReadAllBytes(_openFileDialog.FileName);
+            }
+            catch
+            {
+                MessageBox.Show("Pilti ei ole valitud!");
+            }
+
+            bool valid = !string.IsNullOrEmpty(name) && cat >= 0 && imageBytes != null;
 
             if (valid)
             {
@@ -269,9 +284,8 @@ namespace WinForms
                     _command.Parameters.AddWithValue("@price", price);
                     _command.Parameters.AddWithValue("@image", name + _extension);
 
-                    var byteData = File.ReadAllBytes(_openFileDialog.FileName);
-                    _command.Parameters.AddWithValue("@binimage", byteData);
-                    _command.Parameters.AddWithValue("@cat", cat);
+                    _command.Parameters.AddWithValue("@binimage", imageBytes);
+                    _command.Parameters.AddWithValue("@cat", cat + 1);
 
                     _command.ExecuteNonQuery();
                     _connect.Close();

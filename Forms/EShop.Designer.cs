@@ -197,7 +197,7 @@
             // 
             // _butFindFile
             // 
-            _butFindFile.Location = new Point(576, 212);
+            _butFindFile.Location = new Point(782, 212);
             _butFindFile.Name = "_butFindFile";
             _butFindFile.Size = new Size(75, 23);
             _butFindFile.TabIndex = 17;
