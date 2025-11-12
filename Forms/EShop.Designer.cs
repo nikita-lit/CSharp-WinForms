@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            dataGridView1 = new DataGridView();
+            _dataGridView1 = new DataGridView();
             _pbProductImage = new PictureBox();
             _butAddProduct = new Button();
             _butRemoveProduct = new Button();
@@ -45,31 +45,31 @@
             _butAddProductCategory = new Button();
             _butRemoveProductCategory = new Button();
             _butFindFile = new Button();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)_dataGridView1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)_pbProductImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)_numProductCount).BeginInit();
             ((System.ComponentModel.ISupportInitialize)_numProductPrice).BeginInit();
             SuspendLayout();
             // 
-            // dataGridView1
+            // _dataGridView1
             // 
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(25, 241);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(749, 197);
-            dataGridView1.TabIndex = 0;
+            _dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            _dataGridView1.Location = new Point(12, 241);
+            _dataGridView1.Name = "_dataGridView1";
+            _dataGridView1.Size = new Size(845, 239);
+            _dataGridView1.TabIndex = 0;
             // 
             // _pbProductImage
             // 
-            _pbProductImage.Location = new Point(484, 12);
+            _pbProductImage.Location = new Point(667, 12);
             _pbProductImage.Name = "_pbProductImage";
-            _pbProductImage.Size = new Size(290, 185);
+            _pbProductImage.Size = new Size(190, 190);
             _pbProductImage.TabIndex = 1;
             _pbProductImage.TabStop = false;
             // 
             // _butAddProduct
             // 
-            _butAddProduct.Location = new Point(25, 212);
+            _butAddProduct.Location = new Point(12, 212);
             _butAddProduct.Name = "_butAddProduct";
             _butAddProduct.Size = new Size(75, 23);
             _butAddProduct.TabIndex = 2;
@@ -78,7 +78,7 @@
             // 
             // _butRemoveProduct
             // 
-            _butRemoveProduct.Location = new Point(106, 212);
+            _butRemoveProduct.Location = new Point(93, 212);
             _butRemoveProduct.Name = "_butRemoveProduct";
             _butRemoveProduct.Size = new Size(75, 23);
             _butRemoveProduct.TabIndex = 3;
@@ -87,7 +87,7 @@
             // 
             // _butUpdateProduct
             // 
-            _butUpdateProduct.Location = new Point(187, 212);
+            _butUpdateProduct.Location = new Point(174, 212);
             _butUpdateProduct.Name = "_butUpdateProduct";
             _butUpdateProduct.Size = new Size(75, 23);
             _butUpdateProduct.TabIndex = 4;
@@ -105,7 +105,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(25, 149);
+            label1.Location = new Point(13, 149);
             label1.Name = "label1";
             label1.Size = new Size(74, 15);
             label1.TabIndex = 6;
@@ -114,7 +114,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(63, 115);
+            label3.Location = new Point(13, 115);
             label3.Name = "label3";
             label3.Size = new Size(36, 15);
             label3.TabIndex = 8;
@@ -123,7 +123,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(56, 81);
+            label4.Location = new Point(13, 81);
             label4.Name = "label4";
             label4.Size = new Size(43, 15);
             label4.TabIndex = 9;
@@ -132,7 +132,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(56, 44);
+            label5.Location = new Point(13, 44);
             label5.Name = "label5";
             label5.Size = new Size(43, 15);
             label5.TabIndex = 10;
@@ -165,7 +165,7 @@
             // 
             // _butClearProduct
             // 
-            _butClearProduct.Location = new Point(268, 212);
+            _butClearProduct.Location = new Point(255, 212);
             _butClearProduct.Name = "_butClearProduct";
             _butClearProduct.Size = new Size(75, 23);
             _butClearProduct.TabIndex = 14;
@@ -194,7 +194,7 @@
             // 
             // _butFindFile
             // 
-            _butFindFile.Location = new Point(484, 203);
+            _butFindFile.Location = new Point(576, 212);
             _butFindFile.Name = "_butFindFile";
             _butFindFile.Size = new Size(75, 23);
             _butFindFile.TabIndex = 17;
@@ -206,7 +206,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(869, 492);
             Controls.Add(_butFindFile);
             Controls.Add(_butRemoveProductCategory);
             Controls.Add(_butAddProductCategory);
@@ -223,10 +223,10 @@
             Controls.Add(_butRemoveProduct);
             Controls.Add(_butAddProduct);
             Controls.Add(_pbProductImage);
-            Controls.Add(dataGridView1);
+            Controls.Add(_dataGridView1);
             Name = "EShop";
             Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)_dataGridView1).EndInit();
             ((System.ComponentModel.ISupportInitialize)_pbProductImage).EndInit();
             ((System.ComponentModel.ISupportInitialize)_numProductCount).EndInit();
             ((System.ComponentModel.ISupportInitialize)_numProductPrice).EndInit();
@@ -236,7 +236,7 @@
 
         #endregion
 
-        private DataGridView dataGridView1;
+        private DataGridView _dataGridView1;
         private PictureBox _pbProductImage;
         private Button _butAddProduct;
         private Button _butRemoveProduct;

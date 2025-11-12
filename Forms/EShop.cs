@@ -1,26 +1,102 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.Sqlite;
 using System.Data;
 
 namespace WinForms
 {
     public partial class EShop : Form
     {
-        private SqlCommand _command;
-        private SqlConnection _connect = new(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\Databases\EShopDB.mdf;Integrated Security=True");
-        private SqlDataAdapter _adapterProduct, _adapterProductCategory;
+        private SqliteCommand _command;
+        private SqliteConnection _connect = new(@"Data Source=Databases/EShop.db;");
 
         public EShop()
         {
+            string folder = Path.Combine(Environment.CurrentDirectory, "Databases");
+            Directory.CreateDirectory(folder);
+
+            CreateDatabase();
             InitializeComponent();
+
+            _pbProductImage.SizeMode = PictureBoxSizeMode.StretchImage;
+
+            UpdateData();
             UpdateCategories();
+        }
+
+        private void CreateDatabase()
+        {
+            _connect.Open();
+
+            string product = "CREATE TABLE IF NOT EXISTS Product ( "
+                + "Id int NOT NULL PRIMARY KEY, "
+                + "Name varchar(50) NOT NULL, "
+                + "Count int NOT NULL, "
+                + "Price float NOT NULL, "
+                + "Image varchar(100), "
+                + "BinImage blob, "
+                + "ProductCategoryId int, "
+                + "FOREIGN KEY(ProductCategoryId) REFERENCES ProductCategory(Id)"
+                + " )";
+
+            string productCategory = "CREATE TABLE IF NOT EXISTS ProductCategory ( "
+                + "Id int NOT NULL PRIMARY KEY, "
+                + "Name varchar(50) NOT NULL, "
+                + "Description varchar(200)"
+                + " )";
+
+            _command = new SqliteCommand(product, _connect);
+            _command.ExecuteNonQuery();
+
+            _command = new SqliteCommand(productCategory, _connect);
+            _command.ExecuteNonQuery();
+
+            _connect.Close();
+        }
+
+        private void UpdateData()
+        {
+            _connect.Open();
+            DataTable dt = new();
+
+            string query = "SELECT Product.Id, Product.Name, Product.Count, Product.Price, Product.Image, Product.BinImage, "
+                + "ProductCategory.Name AS ProductCategory FROM Product INNER JOIN ProductCategory ON Product.ProductCategoryId = ProductCategory.Id";
+
+            using (var command = new SqliteCommand(query, _connect))
+            using (var reader = command.ExecuteReader())
+            {
+                dt.Load(reader);
+            }
+
+            _dataGridView1.Columns.Clear();
+            _dataGridView1.DataSource = dt;
+            DataGridViewComboBoxColumn comboBox = new();
+            comboBox.DataPropertyName = "ProductCategory";
+            HashSet<string> keys = new();
+
+            foreach (DataRow row in dt.Rows)
+            {
+                string catName = row["Name"].ToString();
+                if (!keys.Contains(catName))
+                {
+                    keys.Add(catName);
+                    comboBox.Items.Add(catName);
+                }
+            }
+
+            _dataGridView1.Columns.Add(comboBox);
+            _pbProductImage.Image = Image.FromFile(Path.Combine(Path.GetFullPath(@"..\..\..\Images"), "shop.png"));
+            _connect.Close();
         }
 
         private void UpdateCategories()
         {
             _connect.Open();
-            _adapterProduct = new SqlDataAdapter("SELECT Id, Name FROM ProductCategory", _connect);
+
             DataTable dt = new();
-            _adapterProduct.Fill(dt);
+            using (var command = new SqliteCommand("SELECT Id, Name FROM ProductCategory", _connect))
+            using (var reader = command.ExecuteReader())
+            {
+                dt.Load(reader);
+            }
 
             foreach (DataRow item in dt.Rows)
             {
@@ -28,7 +104,7 @@ namespace WinForms
                     _cbProductCategory.Items.Add(item["Name"]);
                 else
                 {
-                    _command = new SqlCommand("DELETE FROM ProductCategory WHERE Id=@id", _connect);
+                    _command = new SqliteCommand("DELETE FROM ProductCategory WHERE Id=@id", _connect);
                     _command.Parameters.AddWithValue("@id", item["Id"]);
                     _command.ExecuteNonQuery();
                 }
@@ -37,10 +113,33 @@ namespace WinForms
             _connect.Close();
         }
 
+        private Form _popupForm;
+
+        private void CreateImage(Image image, int r)
+        {
+            _popupForm = new Form();
+            _popupForm.FormBorderStyle = FormBorderStyle.None;
+            _popupForm.StartPosition = FormStartPosition.Manual;
+            _popupForm.Size = new Size(200, 200);
+
+            PictureBox pic = new();
+            pic.Image = image;
+            pic.Dock = DockStyle.Fill;
+            pic.SizeMode = PictureBoxSizeMode.Zoom;
+
+            _popupForm.Controls.Add(pic);
+
+            Rectangle rect = _dataGridView1.GetCellDisplayRectangle(4, r, true);
+            Point popupPos = _dataGridView1.PointToScreen(rect.Location);
+
+            _popupForm.Location = new Point(popupPos.X + rect.Width, popupPos.Y);
+            _popupForm.Show();
+        }
+
         private void _butAddProductCategory_Click(object sender, EventArgs e)
         {
             bool on = false;
-            foreach(var item in _cbProductCategory.Items)
+            foreach (var item in _cbProductCategory.Items)
             {
                 if (item.ToString() == _cbProductCategory.Text)
                     on = true;
@@ -48,7 +147,7 @@ namespace WinForms
 
             if (!on)
             {
-                _command = new SqlCommand("INSERT INTO ProductCategory (Name) VALUES (@cat)", _connect);
+                _command = new SqliteCommand("INSERT INTO ProductCategory (Name) VALUES (@cat)", _connect);
                 _connect.Open();
                 _command.Parameters.AddWithValue("@cat", _cbProductCategory.Text);
                 _command.ExecuteNonQuery();
@@ -63,11 +162,11 @@ namespace WinForms
 
         private void _butRemoveProductCategory_Click(object sender, EventArgs e)
         {
-            if(_cbProductCategory.SelectedItem != null)
+            if (_cbProductCategory.SelectedItem != null)
             {
                 _connect.Open();
                 string value = _cbProductCategory.SelectedItem.ToString();
-                _command = new SqlCommand("DELETE FROM ProductCategory WHERE Name=@cat", _connect);
+                _command = new SqliteCommand("DELETE FROM ProductCategory WHERE Name=@cat", _connect);
                 _command.Parameters.AddWithValue("@cat", value);
                 _command.ExecuteNonQuery();
                 _connect.Close();
