@@ -1,4 +1,4 @@
-﻿namespace WinForms.Forms.EShop
+﻿namespace WinForms
 {
     partial class CustomerForm
     {
