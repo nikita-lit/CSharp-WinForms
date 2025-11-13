@@ -7,6 +7,7 @@ namespace WinForms
     {
         private SqliteCommand _command;
         private SqliteConnection _connect;
+        private string _curImagePath = null;
 
         public EShop()
         {
@@ -29,7 +30,9 @@ namespace WinForms
 
         private void LoadDefaultImage()
         {
-            _pbProductImage.Image = Image.FromFile(Path.Combine(Path.GetFullPath(@"..\..\..\Images"), "shop.png"));
+            string path = Path.Combine(Path.GetFullPath(@"..\..\..\Images"), "shop.png");
+            _curImagePath = null;
+            _pbProductImage.Image = Image.FromFile(path);
         }
 
         private void CreateDatabase()
@@ -155,10 +158,15 @@ namespace WinForms
 
         private void _butAddProductCategory_Click(object sender, EventArgs e)
         {
+            string product = _cbProductCategory.Text.Trim();
+
+            if (string.IsNullOrEmpty(product))
+                return;
+
             bool on = false;
             foreach (var item in _cbProductCategory.Items)
             {
-                if (item.ToString() == _cbProductCategory.Text)
+                if (item.ToString() == product)
                     on = true;
             }
 
@@ -166,12 +174,12 @@ namespace WinForms
             {
                 _command = new SqliteCommand("INSERT INTO ProductCategory (Name) VALUES (@cat)", _connect);
                 _connect.Open();
-                _command.Parameters.AddWithValue("@cat", _cbProductCategory.Text);
+                _command.Parameters.AddWithValue("@cat", product);
                 _command.ExecuteNonQuery();
                 _connect.Close();
                 _cbProductCategory.Items.Clear();
                 UpdateCategories();
-                MessageBox.Show($"Kategooria {_cbProductCategory.Text} on lisatud!");
+                MessageBox.Show($"Kategooria {product} on lisatud!");
             }
             else
                 MessageBox.Show("Selline kategooriat on juba olemas!");
@@ -198,13 +206,19 @@ namespace WinForms
 
         private void _butFindFile_Click(object sender, EventArgs e)
         {
+            string product = _textProductName.Text.Trim();
+
+            if (string.IsNullOrEmpty(product))
+            {
+                MessageBox.Show("Toote nime ei ole sisestatud");
+                return;
+            }
+
             _openFileDialog = new();
             _openFileDialog.InitialDirectory = @"C:\Users\opilane\Pictures";
             _openFileDialog.Multiselect = true;
             _openFileDialog.Filter = "Images Files (*.jpeg;*.bmp;*.png;*.jpg)|*.jpeg;*.bmp;*.png;*.jpg";
-            string product = _textProductName.Text;
 
-            FileInfo openInfo = new(@"C:\Users\opilane\Pictures" + _openFileDialog.FileName);
             if (_openFileDialog.ShowDialog() == DialogResult.OK && product != null)
             {
                 _saveFileDialog = new();
@@ -217,6 +231,7 @@ namespace WinForms
                 if (_saveFileDialog.ShowDialog() == DialogResult.OK && product != null)
                 {
                     File.Copy(_openFileDialog.FileName, _saveFileDialog.FileName);
+                    _curImagePath = _saveFileDialog.FileName;
                     _pbProductImage.Image = Image.FromFile(_saveFileDialog.FileName);
                 }
             }
@@ -260,7 +275,7 @@ namespace WinForms
 
             try
             {
-                imageBytes = File.ReadAllBytes(_openFileDialog.FileName);
+                imageBytes = File.ReadAllBytes(_curImagePath);
             }
             catch
             {
@@ -290,7 +305,10 @@ namespace WinForms
                     _command.ExecuteNonQuery();
                     _connect.Close();
 
+                    Clear();
                     UpdateData();
+
+                    MessageBox.Show("Andmed lisatud! ");
                 }
                 catch (Exception ex)
                 {
@@ -299,6 +317,145 @@ namespace WinForms
             }
             else
                 MessageBox.Show("Vale andmed!");
+        }
+
+        private void _butClearProduct_Click(object sender, EventArgs e)
+        {
+            Clear();
+        }
+
+        private void Clear()
+        {
+            _textProductName.Text = "";
+            _numProductCount.Value = 0;
+            _numProductPrice.Value = 0;
+            _cbProductCategory.SelectedIndex = -1;
+
+            LoadDefaultImage();
+        }
+
+        private int GetSelectedProductId()
+        {
+            object value;
+
+            try
+            {
+                value = _dataGridView1.SelectedRows[0].Cells["Id"].Value;
+            }
+            catch
+            {
+                return -1;
+            }
+
+            return Convert.ToInt32(value);
+        }
+
+        private void _butRemoveProduct_Click(object sender, EventArgs e)
+        {
+            int id = GetSelectedProductId();
+            if (id > 0)
+            {
+                _connect.Open();
+                _command = new SqliteCommand("DELETE FROM Product WHERE Id=@id", _connect);
+                _command.Parameters.AddWithValue("@id", id);
+                _command.ExecuteNonQuery();
+                _connect.Close();
+
+                UpdateData();
+
+                MessageBox.Show("Andmed tabelist Product on kustutatud!");
+                return;
+            }
+            else
+                MessageBox.Show("Viga Product tabelist andmete kustutamisega!");
+        }
+
+        private void _butUpdateProduct_Click(object sender, EventArgs e)
+        {
+            string name = _textProductName.Text.Trim();
+            decimal count = _numProductCount.Value;
+            decimal price = _numProductPrice.Value;
+            int cat = _cbProductCategory.SelectedIndex;
+            byte[] imageBytes = null;
+            int id = GetSelectedProductId();
+
+            try
+            {
+                imageBytes = File.ReadAllBytes(_curImagePath);
+            }
+            catch
+            {
+                MessageBox.Show("Pilti ei ole valitud!");
+            }
+
+            bool valid = !string.IsNullOrEmpty(name) && cat >= 0 && imageBytes != null && id > 0;
+
+            if (valid)
+            {
+                try
+                {
+                    string query = "UPDATE Product SET Name=@name, Count=@count, Price=@price, "
+                        + "Image=@image, BinImage=@binimage, ProductCategoryId=@cat WHERE Id=@id";
+
+                    _connect.Open();
+                    _command = new SqliteCommand(query, _connect);
+
+                    _command.Parameters.AddWithValue("@name", name);
+                    _command.Parameters.AddWithValue("@count", count);
+                    _command.Parameters.AddWithValue("@price", price);
+                    _command.Parameters.AddWithValue("@image", name + _extension);
+                    _command.Parameters.AddWithValue("@binimage", imageBytes);
+                    _command.Parameters.AddWithValue("@cat", cat + 1);
+                    _command.Parameters.AddWithValue("@id", id);
+
+                    _command.ExecuteNonQuery();
+
+                    _connect.Close();
+
+                    UpdateData();
+
+                    MessageBox.Show("Andmed uuendatud!");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Andmebaasiga VIGA! " + ex.Message);
+                }
+            }
+            else
+                MessageBox.Show("Vale andmed!");
+        }
+
+        private void _dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                int id = GetSelectedProductId();
+
+                if (id > 0)
+                {
+                    try
+                    {
+                        _textProductName.Text = _dataGridView1.SelectedRows[0].Cells["Name"].Value.ToString();
+                        _numProductCount.Value = Convert.ToDecimal(_dataGridView1.SelectedRows[0].Cells["Count"].Value);
+                        _numProductPrice.Value = Convert.ToDecimal(_dataGridView1.SelectedRows[0].Cells["Price"].Value);
+                        _cbProductCategory.SelectedItem = Convert.ToString(_dataGridView1.SelectedRows[0].Cells["ProductCategory"].Value);
+
+                        if (_dataGridView1.CurrentRow.Cells["BinImage"].Value is byte[] imageData)
+                        {
+                            using (MemoryStream ms = new MemoryStream(imageData))
+                            {
+                                Image image = Image.FromStream(ms);
+                                _pbProductImage.Image = image;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Viga!");
+                    }
+                }
+            }
+            catch { }
         }
     }
 }

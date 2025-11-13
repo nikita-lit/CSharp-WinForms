@@ -53,13 +53,17 @@
             // 
             // _dataGridView1
             // 
+            _dataGridView1.AllowUserToAddRows = false;
+            _dataGridView1.AllowUserToDeleteRows = false;
             _dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             _dataGridView1.Location = new Point(12, 241);
             _dataGridView1.Name = "_dataGridView1";
+            _dataGridView1.ReadOnly = true;
             _dataGridView1.Size = new Size(845, 239);
             _dataGridView1.TabIndex = 0;
             _dataGridView1.CellMouseEnter += _dataGridView1_CellMouseEnter;
             _dataGridView1.CellMouseLeave += _dataGridView1_CellMouseLeave;
+            _dataGridView1.SelectionChanged += _dataGridView1_SelectionChanged;
             // 
             // _pbProductImage
             // 
@@ -87,6 +91,7 @@
             _butRemoveProduct.TabIndex = 3;
             _butRemoveProduct.Text = "Kustuta";
             _butRemoveProduct.UseVisualStyleBackColor = true;
+            _butRemoveProduct.Click += _butRemoveProduct_Click;
             // 
             // _butUpdateProduct
             // 
@@ -96,6 +101,7 @@
             _butUpdateProduct.TabIndex = 4;
             _butUpdateProduct.Text = "Uuenda";
             _butUpdateProduct.UseVisualStyleBackColor = true;
+            _butUpdateProduct.Click += _butUpdateProduct_Click;
             // 
             // _cbProductCategory
             // 
@@ -174,6 +180,7 @@
             _butClearProduct.TabIndex = 14;
             _butClearProduct.Text = "Puhasta";
             _butClearProduct.UseVisualStyleBackColor = true;
+            _butClearProduct.Click += _butClearProduct_Click;
             // 
             // _butAddProductCategory
             // 
