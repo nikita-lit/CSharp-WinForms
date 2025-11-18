@@ -6,7 +6,7 @@ namespace WinForms
     public partial class ShopForm : Form
     {
         private SqliteCommand _command;
-        private SqliteConnection _connect;
+        private SqliteConnection _connect = new(@"Data Source=Databases/EShop.db;");
         private string _curImagePath = null;
 
         public ShopForm()
@@ -37,7 +37,6 @@ namespace WinForms
 
         private void CreateDatabase()
         {
-            _connect = new(@"Data Source=Databases/EShop.db;");
             _connect.Open();
 
             string product = "CREATE TABLE IF NOT EXISTS Product ( "
@@ -87,22 +86,6 @@ namespace WinForms
             _dataGridView1.Columns.Clear();
             _dataGridView1.DataSource = dt;
 
-            /*
-            DataGridViewComboBoxColumn comboBox = new();
-            comboBox.DataPropertyName = "ProductCategoryId";
-            HashSet<string> keys = new();
-
-            foreach (DataRow row in dt.Rows)
-            {
-                string catName = row["Name"].ToString();
-                if (!keys.Contains(catName))
-                {
-                    keys.Add(catName);
-                    comboBox.Items.Add(catName);
-                }
-            }
-
-            _dataGridView1.Columns.Add(comboBox);*/
             LoadDefaultImage();
             _connect.Close();
         }
