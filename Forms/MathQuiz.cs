@@ -247,11 +247,9 @@ namespace WinForms
             int correctCount = 0;
             string resultsText = "";
 
-            var examples = Controls.OfType<TableLayoutPanel>()
-                       .OrderBy(t => t.Top)
-                       .ToList();
+            var examples = Controls.OfType<TableLayoutPanel>().OrderBy(t => t.Top).ToList();
 
-            var resultEntry = new QuizResult();
+            QuizResult resultEntry = new();
             resultEntry.Date = DateTime.Now;
             resultEntry.Difficulty = _difficulty;
             resultEntry.Total = examples.Count;
