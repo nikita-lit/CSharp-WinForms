@@ -15,7 +15,7 @@ namespace WinForms
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new MathQuiz());
+            Application.Run(new MatchingGame());
         }
 
         public static string GetDirectory() => AppDomain.CurrentDomain.BaseDirectory;

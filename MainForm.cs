@@ -4,6 +4,9 @@
     {
         public ExampleForm ExampleForm;
         public PictureViewer PictureViewer;
+        public MathQuiz MathQuiz;
+        public MatchingGame MatchingGame;
+        public EShop EShop;
 
         public MainForm()
         {
@@ -19,7 +22,7 @@
             };
 
             Button but = new Button()  {
-                Text = "Vorm 1",
+                Text = "Example Form",
                 Size = new Size(200, 30),
                 Dock = DockStyle.Top,
             };
@@ -30,7 +33,7 @@
             };
 
             Button but2 = new Button() {
-                Text = "Vorm 2",
+                Text = "Picture Viewer",
                 Size = new Size(200, 30),
                 Dock = DockStyle.Top,
             };
@@ -41,16 +44,40 @@
             };
 
             Button but3 = new Button() {
-                Text = "Vorm 3",
+                Text = "Math Quiz",
                 Size = new Size(200, 30),
                 Dock = DockStyle.Top,
             };
             but3.Click += (sender, e) => {
-                ExampleForm = new ExampleForm();
-                ExampleForm.Show();
+                MathQuiz = new MathQuiz();
+                MathQuiz.Show();
                 Hide();
             };
 
+            Button but4 = new Button() {
+                Text = "Matching Game",
+                Size = new Size(200, 30),
+                Dock = DockStyle.Top,
+            };
+            but4.Click += (sender, e) => {
+                MatchingGame = new MatchingGame();
+                MatchingGame.Show();
+                Hide();
+            };
+
+            Button but5 = new Button() {
+                Text = "EShop",
+                Size = new Size(200, 30),
+                Dock = DockStyle.Top,
+            };
+            but5.Click += (sender, e) => {
+                EShop = new EShop();
+                EShop.Show();
+                Hide();
+            };
+
+            butsPanel.Controls.Add(but5);
+            butsPanel.Controls.Add(but4);
             butsPanel.Controls.Add(but3);
             butsPanel.Controls.Add(but2);
             butsPanel.Controls.Add(but);

@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Timer = System.Windows.Forms.Timer;
 
 namespace WinForms
 {
@@ -23,7 +24,7 @@ namespace WinForms
     {
         private Font _font;
         private Label _labelTimer;
-        private System.Windows.Forms.Timer _timer;
+        private Timer _timer;
         private int _timeLeft;
         private int _time = 60;
         private Panel _butStartPanel;
