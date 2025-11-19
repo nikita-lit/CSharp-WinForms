@@ -1,6 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
-using Timer = System.Windows.Forms.Timer;
+﻿using Timer = System.Windows.Forms.Timer;
 
 namespace WinForms
 {
@@ -10,8 +8,7 @@ namespace WinForms
         private int _score = 0;
         private int _mistakes = 0;
         private int _maxMistakes = 0;
-        private int _gridHeight = 4;
-        private int _gridWidth = 4;
+        private int _gridSize = 4;
         private int _timeLeft;
         private int _time = 60;
 
@@ -53,8 +50,8 @@ namespace WinForms
             panel.Location = new Point((Width / 2)-(panel.Width / 2), (Height / 2) - (panel.Height / 2)-50);
 
             _table = new();
-            _table.RowCount = _gridHeight;
-            _table.ColumnCount = _gridWidth;
+            _table.RowCount = _gridSize;
+            _table.ColumnCount = _gridSize;
             _table.Dock = DockStyle.Fill;
             _table.BackColor = Color.LightGreen;
             panel.Controls.Add(_table);
@@ -84,17 +81,16 @@ namespace WinForms
 
             void SetTableSize(int size)
             {
-                _gridHeight = size;
-                _gridWidth = size;
-                _table.RowCount = _gridHeight;
-                _table.ColumnCount = _gridWidth;
+                _gridSize = size;
+                _table.RowCount = _gridSize;
+                _table.ColumnCount = _gridSize;
                 _table.RowStyles.Clear();
                 _table.ColumnStyles.Clear();
 
-                for (int i = 0; i < _gridHeight; i++)
+                for (int i = 0; i < _gridSize; i++)
                     _table.RowStyles.Add(new RowStyle(SizeType.Percent, 25.0f));
 
-                for (int i = 0; i < _gridWidth; i++)
+                for (int i = 0; i < _gridSize; i++)
                     _table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25.0f));
 
                 UpdateTimeAndMistakes(size);
@@ -139,7 +135,7 @@ namespace WinForms
             _cbDiff.Location = new Point((Width / 2) - (_cbDiff.Width / 2) + 165, Height - 140);
             _cbDiff.SelectedIndexChanged += (sender, e) => {
                 _difficulty = (Difficulty)_cbDiff.SelectedIndex;
-                UpdateTimeAndMistakes(_gridWidth);
+                UpdateTimeAndMistakes(_gridSize);
             };
 
             Controls.Add(panel);
@@ -189,12 +185,11 @@ namespace WinForms
         {
             ClearPictures();
 
-            for (int i = 0; i < _gridHeight * _gridWidth; i++)
+            for (int i = 0; i < _gridSize * _gridSize; i++)
             {
                 PictureBox pic = new();
                 pic.Dock = DockStyle.Fill;
                 pic.SizeMode = PictureBoxSizeMode.StretchImage;
-                pic.BackColor = Color.Transparent;
                 pic.BackColor = Color.Green;
                 pic.ForeColor = Color.Green;
                 pic.Margin = new Padding(5);
@@ -203,7 +198,7 @@ namespace WinForms
                 _table.Controls.Add(pic);
             }
 
-            AssignIconsToSquares();
+            SetIconsForPictures();
         }
 
         private void _timer_Tick(object sender, EventArgs e)
@@ -252,7 +247,7 @@ namespace WinForms
             _timeLeft = _time;
             _isStarted = false;
 
-            if (_score >= (_gridWidth * _gridHeight) / 2)
+            if (_score >= (_gridSize * _gridSize) / 2)
                 MessageBox.Show("You matched all pairs!", "Victory");
             else if (_mistakes >= _maxMistakes)
                 MessageBox.Show("Too many mistakes!", "Defeat");
@@ -271,15 +266,15 @@ namespace WinForms
             _startButton.Text = "Start Game!";
         }
 
-        private void AssignIconsToSquares()
+        private void SetIconsForPictures()
         {
-            int totalCells = _gridHeight * _gridWidth;
-            int needPairs = totalCells / 2;
+            int picCount = _gridSize * _gridSize;
+            int pairsCount = picCount / 2;
 
             List<string> iconsCopy = new List<string>();
-            for (int i = 0; i < needPairs; i++)
+            for (int i = 0; i < pairsCount; i++)
             {
-                string icon = _icons[i % _icons.Count];
+                string icon = _icons[i];
                 iconsCopy.Add(icon);
                 iconsCopy.Add(icon);
             }

@@ -1,9 +1,5 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+﻿using System.Diagnostics;
 using System.Text.Json;
-using System.Windows.Forms;
 
 namespace WinForms
 {
@@ -77,7 +73,7 @@ namespace WinForms
         private ToolStripMenuItem _zoomItem;
         private Label _zoomLabel;
         private float _zoom = 1.0f;
-        private List<int> _zoomPercs = new() { 25, 50, 75, 100, 125, 150, 175, 200, 300 };
+        private List<int> _zoomPercs = [ 25, 50, 75, 100, 125, 150, 175, 200, 300 ];
 
         private ToolStripMenuItem _bgColorItem;
         private Color _bgColor = Color.Gray;
@@ -105,12 +101,11 @@ namespace WinForms
             Text = "Picture Viewer";
             BackColor = _bgColor;
 
-            _butsPanel = new Panel() {
-                Size = new Size(Width, 50),
-                Dock = DockStyle.Bottom,
-                Padding = new Padding(10),
-                BackColor = Color.White,
-            };
+            _butsPanel = new();
+            _butsPanel.Size = new Size(Width, 50);
+            _butsPanel.Dock = DockStyle.Bottom;
+            _butsPanel.Padding = new Padding(10);
+            _butsPanel.BackColor = Color.White;
 
             InitTabControl();
             InitCheckBox();
@@ -506,37 +501,31 @@ namespace WinForms
 
         private void InitButtons()
         {
-            Button zoom1 = new Button()
-            {
-                Text = "Zoom In",
-                Dock = DockStyle.Right,
-                AutoSize = true,
-            };
+            Button zoom1 = new();
+            zoom1.Text = "Zoom In";
+            zoom1.Dock = DockStyle.Right;
+            zoom1.AutoSize = true;
             zoom1.Click += (sender, e) => {
                 int index = _zoomPercs.IndexOf(_zoomPerc) + 1;
                 if (index > -1 && index < _zoomPercs.Count)
                     SetZoomPercentage(_zoomPercs[index]);
             };
 
-            Button zoom2 = new Button()
-            {
-                Text = "Zoom Out",
-                Dock = DockStyle.Right,
-                AutoSize = true,
-            };
+            Button zoom2 = new();
+            zoom2.Text = "Zoom Out";
+            zoom2.Dock = DockStyle.Right;
+            zoom2.AutoSize = true;
             zoom2.Click += (sender, e) => {
                 int index = _zoomPercs.IndexOf(_zoomPerc) + -1;
                 if (index > -1 &&  index < _zoomPercs.Count)
                     SetZoomPercentage(_zoomPercs[index]);
             };
 
-            _zoomLabel = new Label()
-            {
-                Text = $"{_zoomPerc}%",
-                TextAlign = ContentAlignment.MiddleCenter,
-                Dock = DockStyle.Right,
-                Width = 60,
-            };
+            _zoomLabel = new();
+            _zoomLabel.Text = $"{_zoomPerc}%";
+            _zoomLabel.TextAlign = ContentAlignment.MiddleCenter;
+            _zoomLabel.Dock = DockStyle.Right;
+            _zoomLabel.Width = 60;
             
             _butsPanel.Controls.Add(_zoomLabel);
             _butsPanel.Controls.Add(zoom1);

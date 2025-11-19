@@ -16,64 +16,53 @@
             Width = 300;
             Text = "Vorm valik";
 
-            Panel butsPanel = new Panel() {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(30)
-            };
+            Panel butsPanel = new();
+            butsPanel.Dock = DockStyle.Fill;
+            butsPanel.Padding = new Padding(30);
 
-            Button but = new Button()  {
-                Text = "Example Form",
-                Size = new Size(200, 30),
-                Dock = DockStyle.Top,
-            };
+            Button but = new();
+            but.Text = "Example Form";
+            but.Size = new Size(200, 30);
+            but.Dock = DockStyle.Top;
             but.Click += (sender, e) => {
                 ExampleForm = new ExampleForm();
                 ExampleForm.Show();
-                Hide();
             };
 
-            Button but2 = new Button() {
-                Text = "Picture Viewer",
-                Size = new Size(200, 30),
-                Dock = DockStyle.Top,
-            };
+            Button but2 = new();
+            but2.Text = "Picture Viewer";
+            but2.Size = new Size(200, 30);
+            but2.Dock = DockStyle.Top;
             but2.Click += (sender, e) => {
                 PictureViewer = new PictureViewer();
                 PictureViewer.Show();
-                Hide();
             };
 
-            Button but3 = new Button() {
-                Text = "Math Quiz",
-                Size = new Size(200, 30),
-                Dock = DockStyle.Top,
-            };
+            Button but3 = new();
+            but3.Text = "Math Quiz";
+            but3.Size = new Size(200, 30);
+            but3.Dock = DockStyle.Top;
             but3.Click += (sender, e) => {
                 MathQuiz = new MathQuiz();
                 MathQuiz.Show();
-                Hide();
             };
 
-            Button but4 = new Button() {
-                Text = "Matching Game",
-                Size = new Size(200, 30),
-                Dock = DockStyle.Top,
-            };
+            Button but4 = new();
+            but4.Text = "Matching Game";
+            but4.Size = new Size(200, 30);
+            but4.Dock = DockStyle.Top;
             but4.Click += (sender, e) => {
                 MatchingGame = new MatchingGame();
                 MatchingGame.Show();
-                Hide();
             };
 
-            Button but5 = new Button() {
-                Text = "EShop",
-                Size = new Size(200, 30),
-                Dock = DockStyle.Top,
-            };
+            Button but5 = new();
+            but5.Text = "EShop";
+            but5.Size = new Size(200, 30);
+            but5.Dock = DockStyle.Top;
             but5.Click += (sender, e) => {
                 EShop = new EShop();
                 EShop.Show();
-                Hide();
             };
 
             butsPanel.Controls.Add(but5);
