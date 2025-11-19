@@ -12,7 +12,7 @@
         {
             InitializeComponent();
 
-            Height = 200;
+            Height = 300;
             Width = 300;
             Text = "Vorm valik";
 

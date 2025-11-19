@@ -535,7 +535,7 @@ namespace WinForms
                 Text = $"{_zoomPerc}%",
                 TextAlign = ContentAlignment.MiddleCenter,
                 Dock = DockStyle.Right,
-                Width = 40,
+                Width = 60,
             };
             
             _butsPanel.Controls.Add(_zoomLabel);

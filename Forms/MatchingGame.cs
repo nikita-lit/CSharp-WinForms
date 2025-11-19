@@ -1,25 +1,38 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
 namespace WinForms
 {
     public partial class MatchingGame : Form
     {
-        private Label _labelTimer;
-        private TableLayoutPanel _table;
-        private Timer _revealTimer;
-        private Timer _timer;
-        private int _timeLeft;
-        private int _time = 60;
-        private PictureBox _firstClicked;
-        private PictureBox _secondClicked;
-        private Random _random = new Random();
+        private bool _isStarted = false;
+        private int _score = 0;
+        private int _mistakes = 0;
+        private int _maxMistakes = 0;
         private int _gridHeight = 4;
         private int _gridWidth = 4;
-        private bool _isStarted = false;
+        private int _timeLeft;
+        private int _time = 60;
+
+        private Timer _revealTimer;
+        private Timer _timer;
+
+        private Label _labelTimer;
+        private Label _labelMistakes;
+        private TableLayoutPanel _table;
+
+        private PictureBox _firstClicked;
+        private PictureBox _secondClicked;
         private Button _startButton;
         private ComboBox _cbGrid, _cbDiff;
-        private int _score = 0;
+
+        private Timer _highlightTimer;
+        private Color _targetColor;
+        private PictureBox _highlightedPic1;
+        private PictureBox _highlightedPic2;
+        private Label _matchingGame;
+        private int _highlightStep;
 
         private Difficulty _difficulty = Difficulty.Easy;
 
@@ -30,6 +43,9 @@ namespace WinForms
             Text = "Matching Game";
             Width = 800;
             Height = 900;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MinimizeBox = false;
+            MaximizeBox = false;
 
             Panel panel = new();
             panel.Size = new Size(650, 650);
@@ -44,10 +60,16 @@ namespace WinForms
             panel.Controls.Add(_table);
 
             _labelTimer = new();
-            _labelTimer.Text = "Time Left: " + _timeLeft;
+            _labelTimer.Text = "Time Left: " + _timeLeft + "s";
             _labelTimer.Font = new Font("Arial", 18);
             _labelTimer.AutoSize = true;
             _labelTimer.Visible = false;
+
+            _labelMistakes = new();
+            _labelMistakes.Text = "Mistakes: " + _mistakes + (_maxMistakes > 0 ? "/"+ _maxMistakes : "");
+            _labelMistakes.Font = new Font("Arial", 18);
+            _labelMistakes.AutoSize = true;
+            _labelMistakes.Visible = false;
 
             _startButton = new();
             _startButton.Text = "Start Game!";
@@ -75,6 +97,11 @@ namespace WinForms
                 for (int i = 0; i < _gridWidth; i++)
                     _table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25.0f));
 
+                UpdateTimeAndMistakes(size);
+            }
+
+            void UpdateTimeAndMistakes(int size)
+            {
                 if (size == 4)
                     _time = GetTimeByDifficulty(60);
                 else if (size == 6)
@@ -83,6 +110,8 @@ namespace WinForms
                     _time = GetTimeByDifficulty(180);
                 else
                     _time = GetTimeByDifficulty(60);
+
+                _maxMistakes = GetMaxMistakes(size * size);
             }
 
             SetTableSize(4);
@@ -110,16 +139,29 @@ namespace WinForms
             _cbDiff.Location = new Point((Width / 2) - (_cbDiff.Width / 2) + 165, Height - 140);
             _cbDiff.SelectedIndexChanged += (sender, e) => {
                 _difficulty = (Difficulty)_cbDiff.SelectedIndex;
+                UpdateTimeAndMistakes(_gridWidth);
             };
 
             Controls.Add(panel);
             Controls.Add(_labelTimer);
+            Controls.Add(_labelMistakes);
             Controls.Add(_startButton);
             Controls.Add(_cbGrid);
             Controls.Add(_cbDiff);
 
             _startButton.Location = new Point((Width / 2) - (_startButton.Width / 2), Height - 140);
             _labelTimer.Location = new Point((800 - 650) - (_labelTimer.Width / 2), 25);
+            _labelMistakes.Location = new Point((800 - 350) - (_labelTimer.Width / 2), 25);
+
+            _matchingGame = new Label();
+            _matchingGame.Text = "Matching Game";
+            _matchingGame.Font = new Font("Arial", 25);
+            _matchingGame.TextAlign = ContentAlignment.MiddleCenter;
+            _matchingGame.AutoSize = true;
+
+            Controls.Add(_matchingGame);
+            _matchingGame.Location = new Point((Width / 2) - (_matchingGame.Width / 2), (Height / 2) - (_matchingGame.Width / 2));
+            _matchingGame.BringToFront();
 
             _revealTimer = new();
             _revealTimer.Interval = 750;
@@ -128,6 +170,10 @@ namespace WinForms
             _timer = new();
             _timer.Interval = 1000;
             _timer.Tick += _timer_Tick;
+
+            _highlightTimer = new Timer();
+            _highlightTimer.Interval = 50;
+            _highlightTimer.Tick += _highlightTimer_Tick;
         }
 
         private void ClearPictures()
@@ -165,8 +211,8 @@ namespace WinForms
             if (_timeLeft > 0)
             {
                 _timeLeft--;
-                _labelTimer.Text = "Time Left: " + _timeLeft;
-                if (_timeLeft <= 10)
+                _labelTimer.Text = "Time Left: " + _timeLeft + "s";
+                if (_timeLeft <= 15)
                     _labelTimer.ForeColor = Color.Red;
             }
             else
@@ -180,12 +226,18 @@ namespace WinForms
 
             GeneratePictures();
 
+            _mistakes = 0;
             _score = 0;
             _isStarted = true;
             _cbGrid.Visible = false;
+            _cbDiff.Visible = false;
+            _matchingGame.Visible = false;
             _timeLeft = _time;
-            _labelTimer.Text = "Time Left: " + _timeLeft;
+            _labelMistakes.Text = "Mistakes: " + _mistakes + (_maxMistakes > 0 ? "/" + _maxMistakes : "");
+            _labelTimer.Text = "Time Left: " + _timeLeft + "s";
             _labelTimer.Visible = true;
+            _labelMistakes.Visible = true;
+            _labelTimer.ForeColor = Color.Black;
             _timer.Start();
 
             _startButton.Text = "End Game";
@@ -200,15 +252,20 @@ namespace WinForms
             _timeLeft = _time;
             _isStarted = false;
 
-            Console.WriteLine(_score);
             if (_score >= (_gridWidth * _gridHeight) / 2)
                 MessageBox.Show("You matched all pairs!", "Victory");
+            else if (_mistakes >= _maxMistakes)
+                MessageBox.Show("Too many mistakes!", "Defeat");
             else
                 MessageBox.Show("Not enough points!", "Defeat");
 
+            _mistakes = 0;
             _score = 0;
             _cbGrid.Visible = true;
+            _cbDiff.Visible = true;
+            _matchingGame.Visible = true;
             _labelTimer.Visible = false;
+            _labelMistakes.Visible = false;
             ClearPictures();
 
             _startButton.Text = "Start Game!";
@@ -229,7 +286,7 @@ namespace WinForms
 
             foreach (PictureBox pic in _table.Controls.OfType<PictureBox>())
             {
-                int index = _random.Next(iconsCopy.Count);
+                int index = Random.Shared.Next(iconsCopy.Count);
                 pic.Image = null;
                 pic.Tag = iconsCopy[index];
                 iconsCopy.RemoveAt(index);
@@ -262,13 +319,22 @@ namespace WinForms
             if (_firstClicked.Tag.ToString() == _secondClicked.Tag.ToString() 
                 && _secondClicked.BackColor != Color.Black)
             {
+                HighlightPair(_firstClicked, _secondClicked, true);
                 _firstClicked = null;
                 _secondClicked = null;
                 _score++;
                 Check();
             }
             else
+            {
+                _mistakes++;
+                _labelMistakes.Text = "Mistakes: " + _mistakes + (_maxMistakes > 0 ? "/" + _maxMistakes : "");
                 _revealTimer.Start();
+                HighlightPair(_firstClicked, _secondClicked, false);
+
+                if (_mistakes >=  _maxMistakes)
+                    EndGame();
+            }
         }
 
         private void RevealTimer_Tick(object sender, EventArgs e)
@@ -317,5 +383,54 @@ namespace WinForms
                 return baseTime;
         }
 
+        private int GetMaxMistakes(int baseMistakes)
+        {
+            if (_difficulty == Difficulty.Easy)
+                return baseMistakes;
+            else if (_difficulty == Difficulty.Medium)
+                return baseMistakes * 2 / 3;
+            else if (_difficulty == Difficulty.Hard)
+                return baseMistakes / 2;
+            else
+                return baseMistakes;
+        }
+
+        private void _highlightTimer_Tick(object sender, EventArgs e)
+        {
+            _highlightStep++;
+            float ratio = _highlightStep / 10f;
+
+            if (ratio > 1) 
+                ratio = 1;
+
+            _highlightedPic1.BackColor = LerpColor(Color.Green, _targetColor, ratio);
+            _highlightedPic2.BackColor = LerpColor(Color.Green, _targetColor, ratio);
+
+            if (_highlightStep >= 10)
+            {
+                _highlightTimer.Stop();
+
+                _highlightedPic1.BackColor = Color.Green;
+                _highlightedPic2.BackColor = Color.Green;
+            }
+        }
+
+
+        private void HighlightPair(PictureBox pic1, PictureBox pic2, bool isCorrect)
+        {
+            _highlightedPic1 = pic1;
+            _highlightedPic2 = pic2;
+            _highlightStep = 0;
+            _targetColor = isCorrect ? Color.LimeGreen : Color.Red;
+            _highlightTimer.Start();
+        }
+
+        private Color LerpColor(Color c1, Color c2, float ratio)
+        {
+            int r = (int)(c1.R + (c2.R - c1.R) * ratio);
+            int g = (int)(c1.G + (c2.G - c1.G) * ratio);
+            int b = (int)(c1.B + (c2.B - c1.B) * ratio);
+            return Color.FromArgb(r, g, b);
+        }
     }
 }

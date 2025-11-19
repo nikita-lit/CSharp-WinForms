@@ -17,6 +17,8 @@ namespace WinForms
         public Difficulty Difficulty { get; set; }
         public int Correct { get; set; }
         public int Total { get; set; }
+        public int Time { get; set; }
+        public int TimeLeft { get; set; }
     }
 
     public partial class MathQuiz : Form
@@ -167,8 +169,8 @@ namespace WinForms
             if (_timeLeft > 0)
             {
                 _timeLeft--;
-                _labelTimer.Text = "Time Left: " + _timeLeft;
-                if (_timeLeft <= 10)
+                _labelTimer.Text = "Time Left: " + _timeLeft + "s";
+                if (_timeLeft <= 15)
                     _labelTimer.ForeColor = Color.Red;
             }
             else
@@ -186,7 +188,8 @@ namespace WinForms
 
             _isStarted = true;
             _timeLeft = _time;
-            _labelTimer.Text = "Time Left: " + _timeLeft;
+            _labelTimer.Text = "Time Left: " + _timeLeft + "s";
+            _labelTimer.ForeColor = Color.Black;
             _timer.Start();
 
             _cbDiff.Visible = false;
@@ -203,10 +206,11 @@ namespace WinForms
                 return;
 
             _timer.Stop();
+            CheckAnswers();
+
             _timeLeft = _time;
             _isStarted = false;
 
-            CheckAnswers();
             RemoveExamples();
             Controls.Remove(_labelTimer);
 
@@ -251,6 +255,8 @@ namespace WinForms
             resultEntry.Date = DateTime.Now;
             resultEntry.Difficulty = _difficulty;
             resultEntry.Total = examples.Count;
+            resultEntry.Time = _time;
+            resultEntry.TimeLeft = _timeLeft;
 
             foreach (var layout in examples)
             {
@@ -433,7 +439,7 @@ namespace WinForms
 
             foreach (var h in _history)
             {
-                historyText.AppendLine($"{h.Date}: {h.Difficulty}, Correct: {h.Correct}/{h.Total}");
+                historyText.AppendLine($"{h.Date}: {h.Difficulty}, Time: {h.TimeLeft}/{h.Time}, Correct: {h.Correct}/{h.Total}");
             }
 
             MessageBox.Show(historyText.ToString(), "Quiz History", MessageBoxButtons.OK, MessageBoxIcon.Information);
