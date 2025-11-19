@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 
 namespace WinForms
 {
@@ -397,7 +398,6 @@ namespace WinForms
         }
 
         public static string HistoryPath => Path.Combine(Program.GetDirectory(), "quiz_history.json");
-
         private List<QuizResult> _history = new();
 
         private void LoadHistory()
@@ -405,7 +405,10 @@ namespace WinForms
             if (File.Exists(HistoryPath))
             {
                 string json = File.ReadAllText(HistoryPath);
-                _history = JsonSerializer.Deserialize<List<QuizResult>>(json) ?? new List<QuizResult>();
+                _history = JsonSerializer.Deserialize<List<QuizResult>>(json);
+
+                if (_history == null)
+                    _history = new();
             }
         }
 
@@ -424,9 +427,18 @@ namespace WinForms
                 return;
             }
 
-            string historyText = string.Join("\n\n", _history.Select(h =>$"{h.Date}: {h.Difficulty}, Correct: {h.Correct}/{h.Total}\n" + string.Join("\n", h.Answers)));
+            var historyText = new StringBuilder();
 
-            MessageBox.Show(historyText, "Quiz History", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            foreach (var h in _history)
+            {
+                historyText.AppendLine($"{h.Date}: {h.Difficulty}, Correct: {h.Correct}/{h.Total}");
+                foreach (var answer in h.Answers)
+                    historyText.AppendLine(" - " + answer);
+
+                historyText.AppendLine();
+            }
+
+            MessageBox.Show(historyText.ToString(), "Quiz History", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
