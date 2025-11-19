@@ -124,12 +124,17 @@ namespace WinForms
             _openFileDialog.Multiselect = true;
 
             _colorDialog = new ColorDialog();
+        }
 
+        protected override void OnLoad(EventArgs e)
+        {
             if (Program.Args.Length > 0)
             {
                 foreach (var path in Program.Args)
                     if (Path.Exists(path))
                         LoadImage(path);
+
+                UpdateBgColor();
             }
         }
 
@@ -232,6 +237,7 @@ namespace WinForms
             ToolStripMenuItem helpMenu = new ToolStripMenuItem("Help");
             ToolStripMenuItem aboutItem = new ToolStripMenuItem("About");
             aboutItem.Click += (sender, e) => {
+                MessageBox.Show("Program author is nikita-lit");
             };
 
             helpMenu.DropDownItems.Add(aboutItem);
@@ -588,12 +594,18 @@ namespace WinForms
                 else
                     BackColor = _bgColor;
 
-                UpdateToolStripItemColor();
-                foreach (TabPage tab in _tabControl.TabPages)
-                {
-                    var picTab = tab.Tag as PictureTab;
-                    picTab.Scroll.BackColor = _bgColor;
-                }
+                UpdateBgColor();
+            }
+        }
+
+        private void UpdateBgColor()
+        {
+
+            UpdateToolStripItemColor();
+            foreach (TabPage tab in _tabControl.TabPages)
+            {
+                var picTab = tab.Tag as PictureTab;
+                picTab.Scroll.BackColor = _bgColor;
             }
         }
 
