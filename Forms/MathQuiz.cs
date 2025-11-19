@@ -17,7 +17,6 @@ namespace WinForms
         public Difficulty Difficulty { get; set; }
         public int Correct { get; set; }
         public int Total { get; set; }
-        public List<string> Answers { get; set; } = new List<string>();
     }
 
     public partial class MathQuiz : Form
@@ -178,7 +177,8 @@ namespace WinForms
 
         private void StartQuiz()
         {
-            if (_isStarted) return;
+            if (_isStarted) 
+                return;
 
             GenerateExamples(4);
 
@@ -199,7 +199,8 @@ namespace WinForms
 
         private void EndQuiz()
         {
-            if (!_isStarted) return;
+            if (!_isStarted)
+                return;
 
             _timer.Stop();
             _timeLeft = _time;
@@ -433,10 +434,6 @@ namespace WinForms
             foreach (var h in _history)
             {
                 historyText.AppendLine($"{h.Date}: {h.Difficulty}, Correct: {h.Correct}/{h.Total}");
-                foreach (var answer in h.Answers)
-                    historyText.AppendLine(" - " + answer);
-
-                historyText.AppendLine();
             }
 
             MessageBox.Show(historyText.ToString(), "Quiz History", MessageBoxButtons.OK, MessageBoxIcon.Information);
