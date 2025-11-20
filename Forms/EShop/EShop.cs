@@ -7,23 +7,30 @@
 
         public EShop()
         {
-            Text = "Valik";
-
             InitializeComponent();
+
+            Text = "Valik";
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MinimizeBox = false;
+            MaximizeBox = false;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if (ShopForm != null && ShopForm.Visible)
+                ShopForm.Close();
+
             CustomerForm = new();
             CustomerForm.Show();
-            Hide();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
+            if (CustomerForm != null && CustomerForm.Visible)
+                CustomerForm.Close();
+
             ShopForm = new();
             ShopForm.Show();
-            Hide();
         }
     }
 }

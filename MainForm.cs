@@ -12,9 +12,11 @@
         {
             InitializeComponent();
 
-            Height = 300;
-            Width = 300;
             Text = "Vorm valik";
+            Size = new Size(300, 300);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MinimizeBox = false;
+            MaximizeBox = false;
 
             Panel butsPanel = new();
             butsPanel.Dock = DockStyle.Fill;

@@ -1,9 +1,19 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
-using System.Windows.Forms;
 
 namespace WinForms
 {
+    public class Client
+    {
+        public string Name { get; set; }
+        public string Password { get; set; }
+        public float Money { get; set; }
+    }
+
+    //pdf file like check
+    //user (money)
+    //products buying
+
     public partial class CustomerForm : Form
     {
         private SqliteConnection _connect = new(@"Data Source=Databases/EShop.db;");
@@ -14,21 +24,22 @@ namespace WinForms
         public CustomerForm()
         {
             InitializeComponent();
+            Test();
 
             Text = "E-pood - Klient";
             Size = new Size(750, 650);
 
-            _tabControl = new TabControl();
+            _tabControl = new();
             _tabControl.Dock = DockStyle.Fill;
 
-            _butCart = new Button();
-            _butCart.Text = "Корзина";
+            _butCart = new();
+            _butCart.Text = "Ostukorv";
             _butCart.Dock = DockStyle.Right;
             _butCart.Click += (sender, e) => {
                 OpenCart();
             };
 
-            var panel = new Panel();
+            Panel panel = new();
             panel.Dock = DockStyle.Bottom;
             panel.Padding = new Padding(5);
             panel.Height = 40;
@@ -64,45 +75,6 @@ namespace WinForms
             _connect.Close();
         }
 
-        private DataTable GetProductsTablesByCategoryId(int catID)
-        {
-            DataTable dt = new();
-
-            string query = "SELECT Id, Name, Count, Price, Image, BinImage "
-                + "FROM Product WHERE ProductCategoryId = @cat";
-
-            _connect.Open();
-
-            using (var command = new SqliteCommand(query, _connect))
-            {
-                command.Parameters.AddWithValue("@cat", catID);
-
-                using (var reader = command.ExecuteReader())
-                    dt.Load(reader);
-            }
-
-            _connect.Close();
-
-            return dt;
-        }
-
-        private DataTable GetProductsTables()
-        {
-            DataTable dt = new();
-            string query = "SELECT Id, Name, Count, Price, Image, BinImage "
-                + "FROM Product";
-
-            _connect.Open();
-
-            using (var command = new SqliteCommand(query, _connect))
-                using (var reader = command.ExecuteReader())
-                    dt.Load(reader);
-
-            _connect.Close();
-
-            return dt;
-        }
-
         private void UpdateProducts(TabPage page, int catID)
         {
             FlowLayoutPanel flow = new();
@@ -111,11 +83,8 @@ namespace WinForms
             flow.AutoScroll = true;
             page.Controls.Add(flow);
 
-            DataTable dt = GetProductsTablesByCategoryId(catID);
+            DataTable dt = GetProductsTables(catID);
 
-            for (int i = 0; i < 25; i++)
-            {
-               
             foreach (DataRow item in dt.Rows)
             {
                 var id = Convert.ToInt32(item["Id"]);
@@ -135,9 +104,7 @@ namespace WinForms
 
                 var data = item["BinImage"] as byte[];
                 using (var ms = new MemoryStream(data))
-                {
                     pic.Image = Image.FromStream(ms);
-                }
 
                 Label lCount = new();
                 lCount.Location = new Point(0, 200-80);
@@ -149,7 +116,7 @@ namespace WinForms
                 Label inStock = new();
                 inStock.Location = new Point(10, 0);
                 inStock.TextAlign = ContentAlignment.TopLeft;
-                inStock.Text = (count > 0 ? "Laos" : "Otses");
+                inStock.Text = (count > 0 ? $"Laos - {count} tk"  : "Otses");
                 inStock.AutoSize = true;
                 inStock.BackColor = Color.White;
                 inStock.ForeColor = (count > 0 ? Color.Green : Color.Red);
@@ -158,7 +125,7 @@ namespace WinForms
                 button.Dock = DockStyle.Bottom;
                 button.BackColor = Color.White;
                 button.Height = 40;
-                button.Text = "В Корзину";
+                button.Text = "Lisa ostukorvi";
                 button.Click += (sender, e) => {
                     AddProductToCart(id);
                 };
@@ -169,37 +136,100 @@ namespace WinForms
                 panel.Controls.Add(button);
                 flow.Controls.Add(panel);
             }
-            }
         }
 
         private Form _formCart;
-        private Dictionary<int, int> Cart = new(); // product id - num
+        private Form _formCount;
+        private Dictionary<int, int> Cart = new(); // product id - count
 
         private void AddProductToCart(int id)
         {
-            if (Cart.ContainsKey(id))
-            {
-                Cart[id] += 1;
-                return;
-            }
+            _formCount = new();
+            _formCount.Text = "E-pood - Mitu tükki sa tahad?";
+            _formCount.Size = new Size(250, 150);
+            _formCount.FormBorderStyle = FormBorderStyle.FixedSingle;
+            _formCount.MinimizeBox = false;
+            _formCount.MaximizeBox = false;
+            _formCount.Padding = new Padding(10);
 
-            Cart.Add(id, 1);
+            TableLayoutPanel tlp = new();
+            tlp.Dock = DockStyle.Fill;
+            tlp.RowCount = 3;
+            tlp.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tlp.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tlp.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+            Label label = new();
+            label.Dock = DockStyle.Fill;
+            label.Text = "Mitu tükki sa tahad?";
+
+            NumericUpDown num = new();
+            num.Dock = DockStyle.Fill;
+            num.Minimum = 0;
+            num.Maximum = 100;
+            num.Value = 1;
+
+            Panel panel = new();
+            panel.Dock = DockStyle.Fill;
+
+            Button button = new();
+            button.Dock = DockStyle.Fill;
+            button.Text = "OK";
+            button.Click += (sender, e) => {
+                int count = Convert.ToInt32(num.Value);
+                int realCount = GetProductCount(id);
+                int alreadyInCart = Cart.ContainsKey(id) ? Cart[id] : 0;
+
+                if (count + alreadyInCart > realCount)
+                {
+                    MessageBox.Show($"Laos on ainult {realCount - alreadyInCart} tk saadaval!", "Pole piisavalt kaupa", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                _formCount.Close();
+
+                if (!Cart.ContainsKey(id))
+                    Cart[id] = count;
+                else
+                    Cart[id] += count;
+
+                MessageBox.Show("Toode on ostukorvi lisatud.");
+            };
+
+            panel.Controls.Add(button);
+
+            Button button2 = new();
+            button2.Dock = DockStyle.Right;
+            button2.Text = "Tühista";
+            button2.Click += (sender, e) => {
+                _formCount.Close();
+            };
+
+            panel.Controls.Add(button2);
+
+            tlp.Controls.Add(label);
+            tlp.Controls.Add(num);
+            tlp.Controls.Add(panel);
+
+            _formCount.Controls.Add(tlp);
+            _formCount.ShowDialog();
         }
 
         private void OpenCart()
         {
-            _formCart = new Form();
+            _formCart = new();
             _formCart.Text = "E-pood - Ostukorv";
             _formCart.Size = new Size(300, 550);
             _formCart.FormBorderStyle = FormBorderStyle.FixedSingle;
             _formCart.MinimizeBox = false;
             _formCart.MaximizeBox = false;
 
-            FlowLayoutPanel flow = new();
-            flow.Dock = DockStyle.Fill;
-            flow.Padding = new Padding(5);
-            flow.FlowDirection = FlowDirection.TopDown;
-            flow.AutoScroll = true;
+            TableLayoutPanel table = new();
+            table.Dock = DockStyle.Fill;
+            table.Padding = new Padding(5);
+            table.ColumnCount = 1;
+            table.RowCount = Cart.Count;
+            table.AutoScroll = true;
 
             DataTable dt = GetProductsTables();
             decimal sum = 0;
@@ -220,16 +250,28 @@ namespace WinForms
                 decimal price = Convert.ToDecimal(row["Price"]);
                 Panel prod = new();
                 prod.Height = 30;
+                prod.Dock = DockStyle.Top;
                 prod.BackColor = Color.GhostWhite;
                 prod.BorderStyle = BorderStyle.FixedSingle;
 
+                Font font1 = new("Arial", 10);
+
                 Label label = new();
                 label.Dock = DockStyle.Fill;
-                label.TextAlign = ContentAlignment.MiddleCenter;
-                label.Text = row["Name"].ToString() + " " + kv.Value + "tk   " + (price * kv.Value) + " €"; ;
-                prod.Controls.Add(label);
+                label.TextAlign = ContentAlignment.MiddleLeft;
+                label.Text = row["Name"].ToString() + " - " + kv.Value + "tk";
+                label.Font = font1;
 
-                flow.Controls.Add(prod);
+                Label label2 = new();
+                label2.Dock = DockStyle.Right;
+                label2.TextAlign = ContentAlignment.MiddleRight;
+                label2.Text = (price * kv.Value) + " €";
+                label2.Font = font1;
+
+                prod.Controls.Add(label);
+                prod.Controls.Add(label2);
+
+                table.Controls.Add(prod);
 
                 sum += price * kv.Value;
             }
@@ -245,8 +287,8 @@ namespace WinForms
             butBuy.Height = 50;
             butBuy.BackColor = Color.Green;
             butBuy.ForeColor = Color.White;
-            butBuy.Font = font; 
-            butBuy.Text = "Osta";
+            butBuy.Font = new Font("Arial", 15, FontStyle.Bold); 
+            butBuy.Text = "Ostan";
 
             Label lSum = new();
             lSum.Dock = DockStyle.Bottom;
@@ -259,9 +301,55 @@ namespace WinForms
             panel.Controls.Add(lSum);
             panel.Controls.Add(butBuy);
 
-            _formCart.Controls.Add(flow);
+            _formCart.Controls.Add(table);
             _formCart.Controls.Add(panel);
             _formCart.ShowDialog();
+        }
+
+        private void BuyProducts()
+        {
+
+        }
+
+        private DataTable GetProductsTables(int catID = 0)
+        {
+            DataTable dt = new();
+
+            string query = "SELECT Id, Name, Count, Price, Image, BinImage "
+                + "FROM Product";
+
+            if (catID > 0)
+                query += " WHERE ProductCategoryId = @cat";
+
+            _connect.Open();
+            using (var command = new SqliteCommand(query, _connect))
+            {
+                if (catID > 0)
+                    command.Parameters.AddWithValue("@cat", catID);
+
+                using (var reader = command.ExecuteReader())
+                    dt.Load(reader);
+            }
+            _connect.Close();
+
+            return dt;
+        }
+
+        private int GetProductCount(int id)
+        {
+            int count = 0;
+
+            _connect.Open();
+            using (var cmd = new SqliteCommand("SELECT Count FROM Product WHERE Id = @id", _connect))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                object result = cmd.ExecuteScalar();
+                if (result != null)
+                    count = Convert.ToInt32(result);
+            }
+            _connect.Close();
+
+            return count;
         }
     }
 }
