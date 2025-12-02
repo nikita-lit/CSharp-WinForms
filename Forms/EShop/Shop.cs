@@ -386,7 +386,11 @@ namespace WinForms
                     _command.Parameters.AddWithValue("@name", name);
                     _command.Parameters.AddWithValue("@count", count);
                     _command.Parameters.AddWithValue("@price", price);
-                    _command.Parameters.AddWithValue("@image", name + _extension);
+                    string t = _dataGridView1.CurrentRow.Cells["Image"].Value.ToString();
+                    if (!string.IsNullOrEmpty(t))
+                        _command.Parameters.AddWithValue("@image", t);
+                    else
+                        _command.Parameters.AddWithValue("@image", name + _extension);
                     _command.Parameters.AddWithValue("@binimage", imageBytes);
                     _command.Parameters.AddWithValue("@cat", cat + 1);
                     _command.Parameters.AddWithValue("@id", id);
@@ -422,6 +426,7 @@ namespace WinForms
                         _numProductCount.Value = Convert.ToDecimal(_dataGridView1.SelectedRows[0].Cells["Count"].Value);
                         _numProductPrice.Value = Convert.ToDecimal(_dataGridView1.SelectedRows[0].Cells["Price"].Value);
                         _cbProductCategory.SelectedItem = Convert.ToString(_dataGridView1.SelectedRows[0].Cells["ProductCategory"].Value);
+                        _curImagePath = Path.Combine(Environment.CurrentDirectory, "Images/"+ _dataGridView1.CurrentRow.Cells["Image"].Value.ToString());
 
                         if (_dataGridView1.CurrentRow.Cells["BinImage"].Value is byte[] imageData)
                         {

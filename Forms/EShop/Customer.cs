@@ -1,18 +1,18 @@
 ﻿using Microsoft.Data.Sqlite;
+using PdfSharp.Pdf;
+using PdfSharp.Drawing;
+using PdfSharp.Fonts;
 using System.Data;
+using System.Text.Json;
 
 namespace WinForms
 {
-    public class Client
-    {
-        public string Name { get; set; }
-        public string Password { get; set; }
-        public float Money { get; set; }
-    }
-
     //pdf file like check
-    //user (money)
-    //products buying
+
+    public class Customer
+    {
+        public decimal Money { get; set; }
+    }
 
     public partial class CustomerForm : Form
     {
@@ -21,13 +21,20 @@ namespace WinForms
         private TabControl _tabControl;
         private Button _butCart;
 
+        private Customer _customer = new();
+        public static string CustomerDataPath => Path.Combine(Program.GetDirectory(), "Data/customer_data.json");
+
         public CustomerForm()
         {
+            Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Data"));
+            Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Data/Checks"));
+            LoadCustomer();
+
             InitializeComponent();
-            Test();
+            GlobalFontSettings.FontResolver = new FontResolver();
 
             Text = "E-pood - Klient";
-            Size = new Size(750, 650);
+            Size = new Size(750, 350);
 
             _tabControl = new();
             _tabControl.Dock = DockStyle.Fill;
@@ -50,6 +57,40 @@ namespace WinForms
             Controls.Add(panel);
 
             UpdateCategories();
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            SaveCustomer();
+        }
+
+        private void LoadCustomer()
+        {
+            try
+            {
+                var json = File.ReadAllText(CustomerDataPath);
+                _customer = JsonSerializer.Deserialize<Customer>(json);
+            }
+            catch (Exception ex)
+            {
+                if (ex is not FileNotFoundException)
+                    MessageBox.Show(ex.ToString(), "Customer data loading error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                else if (ex is FileNotFoundException)
+                    _customer.Money = 1000;
+            }
+        }
+
+        private void SaveCustomer()
+        {
+            try
+            {
+                string json = JsonSerializer.Serialize(_customer);
+                File.WriteAllText(CustomerDataPath, json);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Customer data saving error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void UpdateCategories()
@@ -116,7 +157,7 @@ namespace WinForms
                 Label inStock = new();
                 inStock.Location = new Point(10, 0);
                 inStock.TextAlign = ContentAlignment.TopLeft;
-                inStock.Text = (count > 0 ? $"Laos - {count} tk"  : "Otses");
+                inStock.Text = (count > 0 ? $"Laos - {count} tk"  : "Otsas");
                 inStock.AutoSize = true;
                 inStock.BackColor = Color.White;
                 inStock.ForeColor = (count > 0 ? Color.Green : Color.Red);
@@ -182,7 +223,12 @@ namespace WinForms
 
                 if (count + alreadyInCart > realCount)
                 {
-                    MessageBox.Show($"Laos on ainult {realCount - alreadyInCart} tk saadaval!", "Pole piisavalt kaupa", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    int t = realCount - alreadyInCart;
+                    if (t > 0)
+                        MessageBox.Show($"Laos on ainult {t} tk saadaval!", "Pole piisavalt tooteid", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    else
+                        MessageBox.Show($"Toode on laost otsas!", "Pole piisavalt tooteid", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
                     return;
                 }
 
@@ -215,6 +261,8 @@ namespace WinForms
             _formCount.ShowDialog();
         }
 
+        private decimal _sum;
+
         private void OpenCart()
         {
             _formCart = new();
@@ -224,6 +272,12 @@ namespace WinForms
             _formCart.MinimizeBox = false;
             _formCart.MaximizeBox = false;
 
+            Label money = new();
+            money.Text = "Teie saldo: " + _customer.Money + " €";
+            money.Dock = DockStyle.Top;
+            money.TextAlign = ContentAlignment.MiddleCenter;
+            money.Font = new Font("Arial", 12);
+
             TableLayoutPanel table = new();
             table.Dock = DockStyle.Fill;
             table.Padding = new Padding(5);
@@ -231,8 +285,49 @@ namespace WinForms
             table.RowCount = Cart.Count;
             table.AutoScroll = true;
 
+            Label lSum = new();
             DataTable dt = GetProductsTables();
-            decimal sum = 0;
+            UpdateProductsInCart(table, dt, lSum);
+
+            Panel panel = new();
+            panel.Dock = DockStyle.Bottom;
+            panel.Padding = new Padding(10);
+
+            Font font = new("Arial", 15);
+
+            Button butBuy = new();
+            butBuy.Dock = DockStyle.Bottom;
+            butBuy.Height = 50;
+            butBuy.BackColor = Color.Green;
+            butBuy.ForeColor = Color.White;
+            butBuy.Font = new Font("Arial", 15, FontStyle.Bold); 
+            butBuy.Text = "Ostan";
+            butBuy.Click += (sender, e) => {
+                BuyProducts(_sum);
+            };
+
+            lSum.Dock = DockStyle.Bottom;
+            lSum.BackColor = Color.LightGray;
+            lSum.TextAlign = ContentAlignment.MiddleCenter;
+            lSum.Font = font;
+            lSum.Height = 40;
+            lSum.Text = "Summa: " + _sum + " €";
+
+            panel.Controls.Add(lSum);
+            panel.Controls.Add(butBuy);
+
+            _formCart.Controls.Add(table);
+            _formCart.Controls.Add(money);
+            _formCart.Controls.Add(panel);
+            _formCart.ShowDialog();
+        }
+
+        private void UpdateProductsInCart(TableLayoutPanel table, DataTable dt, Label lSum)
+        {
+            foreach (Control control in table.Controls)
+                table.Controls.Remove(control);
+
+            _sum = 0;
 
             foreach (var kv in Cart)
             {
@@ -268,47 +363,160 @@ namespace WinForms
                 label2.Text = (price * kv.Value) + " €";
                 label2.Font = font1;
 
+                Button but = new();
+                but.Text = "X";
+                but.ForeColor = Color.White;
+                but.BackColor = Color.Red;
+                but.Width = 30;
+                but.Dock = DockStyle.Right;
+                but.Font = new Font("Arial", 10, FontStyle.Bold);
+
+                but.Click += (sender, e) =>
+                {
+                    Cart.Remove(kv.Key);
+                    UpdateProductsInCart(table, dt, lSum);
+                };
+
                 prod.Controls.Add(label);
                 prod.Controls.Add(label2);
+                prod.Controls.Add(but);
 
                 table.Controls.Add(prod);
-
-                sum += price * kv.Value;
+                _sum += price * kv.Value;
             }
 
-            Panel panel = new();
-            panel.Dock = DockStyle.Bottom;
-            panel.Padding = new Padding(10);
-
-            Font font = new("Arial", 15);
-
-            Button butBuy = new();
-            butBuy.Dock = DockStyle.Bottom;
-            butBuy.Height = 50;
-            butBuy.BackColor = Color.Green;
-            butBuy.ForeColor = Color.White;
-            butBuy.Font = new Font("Arial", 15, FontStyle.Bold); 
-            butBuy.Text = "Ostan";
-
-            Label lSum = new();
-            lSum.Dock = DockStyle.Bottom;
-            lSum.BackColor = Color.LightGray;
-            lSum.TextAlign = ContentAlignment.MiddleCenter;
-            lSum.Font = font;
-            lSum.Height = 40;
-            lSum.Text = "Summa: " + sum + " €";
-
-            panel.Controls.Add(lSum);
-            panel.Controls.Add(butBuy);
-
-            _formCart.Controls.Add(table);
-            _formCart.Controls.Add(panel);
-            _formCart.ShowDialog();
+            lSum.Text = "Summa: " + _sum + " €";
         }
 
-        private void BuyProducts()
+        private void BuyProducts(decimal sum)
         {
+            if (Cart.Count <= 0)
+            {
+                MessageBox.Show("Ostukorv on tühi!", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
+            if (_customer.Money < sum)
+            {
+                MessageBox.Show("Sul ei ole piisavalt raha!", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            foreach (var kv in Cart)
+            {
+                int id = kv.Key;
+                int needCount = kv.Value;
+
+                int realCount = GetProductCount(id);
+
+                if (realCount < needCount)
+                {
+                    MessageBox.Show(
+                        $"Toodet ID={id} ei ole piisavalt laos!\nSaadaval: {realCount}, vaja: {needCount}",
+                        "Laovarude viga",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning
+                    );
+                    return;
+                }
+            }
+
+            _customer.Money -= sum;
+            SaveCustomer();
+
+            _connect.Open();
+            try
+            {
+                foreach (var kv in Cart)
+                {
+                    using (var command = new SqliteCommand("UPDATE Product SET Count = Count - @cnt WHERE Id = @id", _connect))
+                    {
+                        command.Parameters.AddWithValue("@cnt", kv.Value);
+                        command.Parameters.AddWithValue("@id", kv.Key);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Viga andmebaasi uuendamisel!", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            _connect.Close();
+
+            CreatePDFCheck(_sum);
+            Cart.Clear();
+            _formCart?.Close();
+
+            UpdateCategories();
+            MessageBox.Show("Ost sooritati edukalt!", "Valmis", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void CreatePDFCheck(decimal sum)
+        {
+            try
+            {
+                string file = Path.Combine(Program.GetDirectory(), "Data/Checks", $"check_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.pdf");
+
+                PdfDocument pdf = new PdfDocument();
+                pdf.Info.Title = "E-pood Check";
+
+                var page = pdf.AddPage();
+                var gfx =XGraphics.FromPdfPage(page);
+
+                var fontTitle = new XFont("Arial", 16);
+                var fontText = new XFont("Arial", 12);
+
+                int y = 40;
+
+                gfx.DrawString("E-pood – Ostutšekk", fontTitle, XBrushes.Black, 20, y);
+                y += 40;
+
+                gfx.DrawString($"Kuupäev: {DateTime.Now}", fontText, XBrushes.Black, 20, y);
+                y += 30;
+
+                gfx.DrawString("Ostetud tooted:", fontText, XBrushes.Black, 20, y);
+                y += 25;
+
+                DataTable dt = GetProductsTables();
+
+                foreach (var kv in Cart)
+                {
+                    DataRow row = null;
+                    foreach (DataRow item in dt.Rows)
+                        if (Convert.ToInt32(item["Id"]) == kv.Key)
+                        {
+                            row = item;
+                            break;
+                        }
+
+                    if (row == null)
+                        continue;
+
+                    string name = row["Name"].ToString();
+                    decimal price = Convert.ToDecimal(row["Price"]);
+                    decimal cost = price * kv.Value;
+
+                    gfx.DrawString($"{name} — {kv.Value} tk — {cost} €",
+                        fontText, XBrushes.Black, 20, y);
+
+                    y += 20;
+                }
+
+                y += 10;
+                gfx.DrawLine(XPens.Black, 20, y, 300, y);
+                y += 20;
+
+                gfx.DrawString($"Kokku makstud: " + sum + " €", new XFont("Arial", 14), XBrushes.Black, 20, y);
+
+                pdf.Save(file);
+
+                MessageBox.Show($"Tšekk on loodud!\n\nAsukoht:\n{file}", "Tšekk valmis", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "PDF loomise viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private DataTable GetProductsTables(int catID = 0)
@@ -350,6 +558,29 @@ namespace WinForms
             _connect.Close();
 
             return count;
+        }
+    }
+
+    public class FontResolver : IFontResolver
+    {
+        public byte[] GetFont(string faceName)
+        {
+            switch (faceName)
+            {
+                case "Arial":
+                    return File.ReadAllBytes(@"..\..\..\fonts\arial.ttf");
+            }
+            return null;
+        }
+
+        public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
+        {
+            familyName = familyName.ToLower();
+
+            if (familyName == "arial")
+                return new FontResolverInfo("Arial");
+
+            return null;
         }
     }
 }
