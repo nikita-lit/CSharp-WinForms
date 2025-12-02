@@ -63,6 +63,7 @@
             but5.Size = new Size(200, 30);
             but5.Dock = DockStyle.Top;
             but5.Click += (sender, e) => {
+                Hide();
                 EShop = new EShop();
                 EShop.Show();
             };

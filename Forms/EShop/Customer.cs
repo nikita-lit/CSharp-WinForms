@@ -445,7 +445,7 @@ namespace WinForms
                     }
                 }
             }
-            catch (Exception e)
+            catch
             {
                 MessageBox.Show("Viga andmebaasi uuendamisel!", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
