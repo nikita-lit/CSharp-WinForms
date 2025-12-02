@@ -7,7 +7,6 @@ using System.Text.Json;
 
 namespace WinForms
 {
-    //pdf file like check
 
     public class Customer
     {
@@ -95,6 +94,8 @@ namespace WinForms
 
         private void UpdateCategories()
         {
+            int selectedIndex = _tabControl.SelectedIndex;
+
             foreach (TabPage tab in _tabControl.TabPages)
                 _tabControl.TabPages.Remove(tab);
 
@@ -114,6 +115,9 @@ namespace WinForms
             }
 
             _connect.Close();
+
+            if (selectedIndex >= 0 && selectedIndex < _tabControl.TabCount)
+                _tabControl.SelectedIndex = selectedIndex;
         }
 
         private void UpdateProducts(TabPage page, int catID)
@@ -131,6 +135,8 @@ namespace WinForms
                 var id = Convert.ToInt32(item["Id"]);
                 var name = item["Name"].ToString();
                 var count = Convert.ToInt32(item["Count"]);
+                if (Cart.ContainsKey(id))
+                    count -= Cart[id];
                 var price = item["Price"].ToString();
 
                 Panel panel = new();
@@ -238,6 +244,8 @@ namespace WinForms
                     Cart[id] = count;
                 else
                     Cart[id] += count;
+
+                UpdateCategories();
 
                 MessageBox.Show("Toode on ostukorvi lisatud.");
             };
