@@ -31,19 +31,19 @@ namespace WinForms.CarsService
             lblOwner.Text = "Owner:";
             lblOwner.Top = 360;
             lblOwner.Left = 10;
-            cars.Controls.Add(lblOwner);
 
             _cbOwners.Top = 380;
             _cbOwners.Left = 10;
             cars.Controls.Add(_cbOwners);
-
-            _butAddCar.Text = "Add Car";
+            cars.Controls.Add(lblOwner);
+            
+            _butAddCar.Text = "Add";
             _butAddCar.Top = 380;
             _butAddCar.Left = 150;
             _butAddCar.Click += _butAddCar_Click;
             cars.Controls.Add(_butAddCar);
 
-            _butDeleteCar.Text = "Delete Selected";
+            _butDeleteCar.Text = "Delete";
             _butDeleteCar.Top = 380;
             _butDeleteCar.Left = 250;
             _butDeleteCar.Click += _butDeleteCar_Click;

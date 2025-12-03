@@ -26,9 +26,13 @@ namespace WinForms.CarsService
             SetupCarsTab(cars);
             _tabControl.TabPages.Add(cars);
 
-            TabPage services = new("Maintenance and Services");
+            TabPage services = new("Services");
             SetupServicesTab(services);
             _tabControl.TabPages.Add(services);
+
+            TabPage carServices = new("Car Services");
+            //SetupServicesTab(services);
+            _tabControl.TabPages.Add(carServices);
 
             Controls.Add(_tabControl);
         }

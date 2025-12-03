@@ -8,6 +8,7 @@ namespace WinForms.CarsService
         private TextBox _txtServiceName = new();
         private TextBox _txtServicePrice = new();
         private Button _butAddService = new();
+        private Button _butDeleteService = new();
 
         private void SetupServicesTab(TabPage services)
         {
@@ -35,11 +36,17 @@ namespace WinForms.CarsService
             _txtServicePrice.Left = 10;
             services.Controls.Add(_txtServicePrice);
 
-            _butAddService.Text = "Add Service";
+            _butAddService.Text = "Add";
             _butAddService.Top = 280;
             _butAddService.Left = 150;
             _butAddService.Click += _butAddService_Click;
             services.Controls.Add(_butAddService);
+
+            _butDeleteService.Text = "Delete";
+            _butDeleteService.Top = 280;
+            _butDeleteService.Left = 250;
+            _butDeleteService.Click += _butDeleteService_Click;
+            services.Controls.Add(_butDeleteService);
 
             LoadServices();
         }
@@ -62,5 +69,17 @@ namespace WinForms.CarsService
             }
         }
 
+        private void _butDeleteService_Click(object sender, EventArgs e)
+        {
+            if (_dgvServices.CurrentRow != null)
+            {
+                if (_dgvServices.CurrentRow.DataBoundItem is Service service)
+                {
+                    _dbContext.Services.Remove(service);
+                    _dbContext.SaveChanges();
+                    LoadServices();
+                }
+            }
+        }
     }
 }

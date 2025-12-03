@@ -15,20 +15,23 @@ namespace WinForms.CarsService
             _dgvOwners.Height = 300;
             owners.Controls.Add(_dgvOwners);
 
-            Label lblName = new() { Text = "Owner Name:", Top = 310, Left = 10 };
+            Label lblName = new();
+            lblName.Text = "Owner Name:";
+            lblName.Top = 310;
+            lblName.Left = 10;
             owners.Controls.Add(lblName);
 
             _txtOwnerName.Top = 330;
             _txtOwnerName.Left = 10;
             owners.Controls.Add(_txtOwnerName);
 
-            _butAddOwner.Text = "Add Owner";
+            _butAddOwner.Text = "Add";
             _butAddOwner.Top = 330;
             _butAddOwner.Left = 150;
             _butAddOwner.Click += _butAddOwner_Click;
             owners.Controls.Add(_butAddOwner);
 
-            _butDeleteOwner.Text = "Delete Selected";
+            _butDeleteOwner.Text = "Delete";
             _butDeleteOwner.Top = 330;
             _butDeleteOwner.Left = 250;
             _butDeleteOwner.Click += _butDeleteOwner_Click;
