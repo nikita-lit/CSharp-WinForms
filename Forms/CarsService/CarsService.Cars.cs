@@ -1,0 +1,91 @@
+﻿using Microsoft.EntityFrameworkCore;
+using WinForms.CarsService.Models;
+
+namespace WinForms.CarsService
+{
+    public partial class CarsService
+    {
+        private DataGridView _dgvCars = new();
+        private TextBox _txtCarModel = new();
+        private ComboBox _cbOwners = new();
+        private Button _butAddCar = new();
+        private Button _butDeleteCar = new();
+
+        private void SetupCarsTab(TabPage cars)
+        {
+            _dgvCars.Dock = DockStyle.Top;
+            _dgvCars.Height = 300;
+            cars.Controls.Add(_dgvCars);
+
+            Label lblModel = new() { Text = "Car Model:", Top = 310, Left = 10 };
+            cars.Controls.Add(lblModel);
+
+            _txtCarModel.Top = 330;
+            _txtCarModel.Left = 10;
+            cars.Controls.Add(_txtCarModel);
+
+            Label lblOwner = new() { Text = "Owner:", Top = 360, Left = 10 };
+            cars.Controls.Add(lblOwner);
+
+            _cbOwners.Top = 380;
+            _cbOwners.Left = 10;
+            cars.Controls.Add(_cbOwners);
+
+            _butAddCar.Text = "Add Car";
+            _butAddCar.Top = 380;
+            _butAddCar.Left = 150;
+            _butAddCar.Click += _butAddCar_Click;
+            cars.Controls.Add(_butAddCar);
+
+            _butDeleteCar.Text = "Delete Selected";
+            _butDeleteCar.Top = 380;
+            _butDeleteCar.Left = 250;
+            _butDeleteCar.Click += _butDeleteCar_Click;
+            cars.Controls.Add(_butDeleteCar);
+
+            LoadCars();
+            LoadOwnersForCombo();
+        }
+
+        private void LoadOwnersForCombo()
+        {
+            _cbOwners.DataSource = _dbContext.Owners.ToList();
+            _cbOwners.DisplayMember = "FullName";
+            _cbOwners.ValueMember = "Id";
+        }
+
+        private void LoadCars()
+        {
+            _dgvCars.DataSource = _dbContext.Cars.Include(c => c.Owner).ToList();
+        }
+
+        private void _butAddCar_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(_txtCarModel.Text) && _cbOwners.SelectedItem != null)
+            {
+                Car car = new()
+                {
+                    Model = _txtCarModel.Text,
+                    OwnerId = ((Owner)_cbOwners.SelectedItem).Id
+                };
+                _dbContext.Cars.Add(car);
+                _dbContext.SaveChanges();
+                LoadCars();
+                _txtCarModel.Clear();
+            }
+        }
+
+        private void _butDeleteCar_Click(object sender, EventArgs e)
+        {
+            if (_dgvCars.CurrentRow != null)
+            {
+                if (_dgvCars.CurrentRow.DataBoundItem is Car car)
+                {
+                    _dbContext.Cars.Remove(car);
+                    _dbContext.SaveChanges();
+                    LoadCars();
+                }
+            }
+        }
+    }
+}
