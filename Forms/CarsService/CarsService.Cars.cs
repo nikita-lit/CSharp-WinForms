@@ -17,14 +17,20 @@ namespace WinForms.CarsService
             _dgvCars.Height = 300;
             cars.Controls.Add(_dgvCars);
 
-            Label lblModel = new() { Text = "Car Model:", Top = 310, Left = 10 };
+            Label lblModel = new();
+            lblModel.Text = "Car Model:";
+            lblModel.Top = 310;
+            lblModel.Left = 10;
             cars.Controls.Add(lblModel);
 
             _txtCarModel.Top = 330;
             _txtCarModel.Left = 10;
             cars.Controls.Add(_txtCarModel);
 
-            Label lblOwner = new() { Text = "Owner:", Top = 360, Left = 10 };
+            Label lblOwner = new();
+            lblOwner.Text = "Owner:";
+            lblOwner.Top = 360;
+            lblOwner.Left = 10;
             cars.Controls.Add(lblOwner);
 
             _cbOwners.Top = 380;
@@ -63,11 +69,10 @@ namespace WinForms.CarsService
         {
             if (!string.IsNullOrWhiteSpace(_txtCarModel.Text) && _cbOwners.SelectedItem != null)
             {
-                Car car = new()
-                {
-                    Model = _txtCarModel.Text,
-                    OwnerId = ((Owner)_cbOwners.SelectedItem).Id
-                };
+                var car = new Car();
+                car.Model = _txtCarModel.Text;
+                car.OwnerId = ((Owner)_cbOwners.SelectedItem).Id;
+
                 _dbContext.Cars.Add(car);
                 _dbContext.SaveChanges();
                 LoadCars();

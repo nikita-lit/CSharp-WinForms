@@ -15,14 +15,20 @@ namespace WinForms.CarsService
             _dgvServices.Height = 200;
             services.Controls.Add(_dgvServices);
 
-            Label lblName = new() { Text = "Service Name:", Top = 210, Left = 10 };
+            Label lblName = new();
+            lblName.Text = "Service Name:";
+            lblName.Top = 210;
+            lblName.Left = 10;
             services.Controls.Add(lblName);
 
             _txtServiceName.Top = 230;
             _txtServiceName.Left = 10;
             services.Controls.Add(_txtServiceName);
 
-            Label lblPrice = new() { Text = "Price:", Top = 260, Left = 10 };
+            Label lblPrice = new();
+            lblPrice.Text = "Price:";
+            lblPrice.Top = 260;
+            lblPrice.Left = 10;
             services.Controls.Add(lblPrice);
 
             _txtServicePrice.Top = 280;
@@ -45,7 +51,8 @@ namespace WinForms.CarsService
 
         private void _butAddService_Click(object sender, EventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(_txtServiceName.Text) && float.TryParse(_txtServicePrice.Text, out float price))
+            if (!string.IsNullOrWhiteSpace(_txtServiceName.Text) 
+                && float.TryParse(_txtServicePrice.Text, out float price))
             {
                 _dbContext.Services.Add(new Service { Name = _txtServiceName.Text, Price = price });
                 _dbContext.SaveChanges();
