@@ -13,7 +13,7 @@ namespace WinForms.CarsService
         private Form _formAddCar;
         private int _currentCarRow = -1;
 
-        private void SetupCarsTab(TabPage cars)
+        private void SetupCarsTab(Panel cars)
         {
             ScrollableControl panel = new();
             panel.Dock = DockStyle.Top;

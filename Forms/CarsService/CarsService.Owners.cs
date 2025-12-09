@@ -9,7 +9,7 @@ namespace WinForms.CarsService
         private TextBox _txtOwnerPhone;
         private Form _formAddOwner;
 
-        private void SetupOwnersTab(TabPage owners)
+        private void SetupOwnersTab(Panel owners)
         {
             _dgvOwners = new();
             _dgvOwners.Dock = DockStyle.Top;

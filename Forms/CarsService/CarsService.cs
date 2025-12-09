@@ -7,7 +7,7 @@ namespace WinForms.CarsService
     public partial class CarsService : Form
     {
         public CarsServiceDbContext _dbContext = new();
-        public TabControl2 _tabControl = new();
+        public TabControl2 _tabControl;
 
         public CarsService()
         {
@@ -18,19 +18,19 @@ namespace WinForms.CarsService
             Size = new Size(750, 550);
             BackColor = BackgroundColor;
 
-            _tabControl = new();
+            _tabControl = new(HeaderColor, BackgroundColor, RowColor, HeaderLineColor);
             _tabControl.Dock = DockStyle.Fill;
 
             Panel owners = new();
             owners.Text = "Owners";
             owners.BackColor = BackgroundColor;
-            //SetupOwnersTab(owners);
+            SetupOwnersTab(owners);
             _tabControl.AddTab(owners);
 
             Panel cars = new();
             cars.Text = "Cars";
             cars.BackColor = BackgroundColor;
-            //SetupCarsTab(cars);
+            SetupCarsTab(cars);
             _tabControl.AddTab(cars);
 
             //TabPage services = new("Services");
