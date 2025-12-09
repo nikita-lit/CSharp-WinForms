@@ -1,11 +1,13 @@
-﻿using WinForms.CarsService.Models;
+﻿using System.Windows.Forms;
+using WinForms.CarsService.Elements;
+using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
 {
     public partial class CarsService : Form
     {
         public CarsServiceDbContext _dbContext = new();
-        public TabControl _tabControl = new();
+        public TabControl2 _tabControl = new();
 
         public CarsService()
         {
@@ -14,25 +16,30 @@ namespace WinForms.CarsService
 
             Text = "Cars Service";
             Size = new Size(750, 550);
+            BackColor = BackgroundColor;
 
             _tabControl = new();
             _tabControl.Dock = DockStyle.Fill;
 
-            TabPage owners = new("Owners");
-            SetupOwnersTab(owners);
-            _tabControl.TabPages.Add(owners);
+            Panel owners = new();
+            owners.Text = "Owners";
+            owners.BackColor = BackgroundColor;
+            //SetupOwnersTab(owners);
+            _tabControl.AddTab(owners);
 
-            TabPage cars = new("Cars");
-            SetupCarsTab(cars);
-            _tabControl.TabPages.Add(cars);
+            Panel cars = new();
+            cars.Text = "Cars";
+            cars.BackColor = BackgroundColor;
+            //SetupCarsTab(cars);
+            _tabControl.AddTab(cars);
 
-            TabPage services = new("Services");
+            //TabPage services = new("Services");
             //SetupServicesTab(services);
-            _tabControl.TabPages.Add(services);
+            //_tabControl.TabPages.Add(services);
 
-            TabPage carServices = new("Car Services");
+            //TabPage carServices = new("Car Services");
             //SetupServicesTab(services);
-            _tabControl.TabPages.Add(carServices);
+            //_tabControl.TabPages.Add(carServices);
 
             Controls.Add(_tabControl);
         }

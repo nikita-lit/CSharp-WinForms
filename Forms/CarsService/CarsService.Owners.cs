@@ -51,6 +51,7 @@ namespace WinForms.CarsService
             _formAddOwner.MinimizeBox = false;
             _formAddOwner.MaximizeBox = false;
 
+            //----------------------------------------
             Label lblName = new();
             lblName.Text = "Full Name:";
             lblName.Dock = DockStyle.Top;
@@ -62,6 +63,7 @@ namespace WinForms.CarsService
             if (isOwnerValid)
                 _txtOwnerName.Text = owner.FullName;
 
+            //----------------------------------------
             Label lblPhone = new();
             lblPhone.Text = "Phone Number:";
             lblPhone.Dock = DockStyle.Top;
@@ -73,6 +75,7 @@ namespace WinForms.CarsService
             if (isOwnerValid)
                 _txtOwnerPhone.Text = owner.Phone;
 
+            //----------------------------------------
             Button but = new();
             but.Text = (isOwnerValid ? "Update" : "Add");
             but.Dock = DockStyle.Bottom;
@@ -98,6 +101,7 @@ namespace WinForms.CarsService
                     MessageBox.Show("Data is invalid!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             };
 
+            //----------------------------------------
             _formAddOwner.Controls.Add(_txtOwnerPhone);
             _formAddOwner.Controls.Add(lblPhone);
             _formAddOwner.Controls.Add(_txtOwnerName);
