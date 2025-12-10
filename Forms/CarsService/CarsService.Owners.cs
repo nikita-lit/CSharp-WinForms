@@ -5,8 +5,6 @@ namespace WinForms.CarsService
     public partial class CarsService
     {
         private TableLayoutPanel _tlpOwners;
-        private TextBox _txtOwnerName;
-        private TextBox _txtOwnerPhone;
         private Form _formAddOwner;
         private int _currentOwnerRow = -1;
 
@@ -16,12 +14,12 @@ namespace WinForms.CarsService
             panel.Dock = DockStyle.Top;
             panel.Height = 300;
             panel.AutoScroll = true;
+            panel.BackColor = Colors.TableBackground;
 
             _tlpOwners = new();
-            _tlpOwners.BackColor = Color.FromArgb(100, 100, 100);
+            _tlpOwners.BackColor = Colors.TableBackground;
             _tlpOwners.AutoSize = true;
-            _tlpOwners.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            _tlpOwners.Dock = DockStyle.Fill;
+            _tlpOwners.Dock = DockStyle.Top;
 
             panel.Controls.Add(_tlpOwners);
 
@@ -45,6 +43,9 @@ namespace WinForms.CarsService
 
         private void LoadOwners()
         {
+            if (_tlpOwners == null)
+                return;
+
             _tlpOwners.Controls.Clear();
             _tlpOwners.RowStyles.Clear();
             _tlpOwners.ColumnStyles.Clear();
@@ -118,6 +119,8 @@ namespace WinForms.CarsService
                 _tlpOwners.Controls.Add(CreateLabel(owner.FullName, row), 1, row + 1);
                 _tlpOwners.Controls.Add(CreateLabel(owner.Phone, row), 2, row + 1);
             }
+
+            LoadCars();
         }
 
         private Owner GetCurrentOwner()
@@ -152,10 +155,10 @@ namespace WinForms.CarsService
             lblName.Width = 80;
             lblName.ForeColor = Colors.Text;
 
-            _txtOwnerName = new();
-            _txtOwnerName.Dock = DockStyle.Top;
+            TextBox txtOwnerName = new();
+            txtOwnerName.Dock = DockStyle.Top;
             if (isOwnerValid)
-                _txtOwnerName.Text = owner.FullName;
+                txtOwnerName.Text = owner.FullName;
 
             //----------------------------------------
             Label lblPhone = new();
@@ -165,10 +168,10 @@ namespace WinForms.CarsService
             lblPhone.Width = 80;
             lblPhone.ForeColor = Colors.Text;
 
-            _txtOwnerPhone = new();
-            _txtOwnerPhone.Dock = DockStyle.Top;
+            TextBox txtOwnerPhone = new();
+            txtOwnerPhone.Dock = DockStyle.Top;
             if (isOwnerValid)
-                _txtOwnerPhone.Text = owner.Phone;
+                txtOwnerPhone.Text = owner.Phone;
 
             //----------------------------------------
             Button but = new();
@@ -176,17 +179,17 @@ namespace WinForms.CarsService
             but.Dock = DockStyle.Bottom;
             SetupButtonStyle(but);
             but.Click += (sender, e) => {
-                bool isValid = !string.IsNullOrWhiteSpace(_txtOwnerName.Text)
-                    && !string.IsNullOrWhiteSpace(_txtOwnerPhone.Text);
+                bool isValid = !string.IsNullOrWhiteSpace(txtOwnerName.Text)
+                    && !string.IsNullOrWhiteSpace(txtOwnerPhone.Text);
 
                 if (isValid)
                 {
                     if (!isOwnerValid)
-                        _dbContext.Owners.Add(new Owner { FullName = _txtOwnerName.Text, Phone = _txtOwnerPhone.Text });
+                        _dbContext.Owners.Add(new Owner { FullName = txtOwnerName.Text, Phone = txtOwnerPhone.Text });
                     else
                     {
-                        owner.FullName = _txtOwnerName.Text;
-                        owner.Phone = _txtOwnerPhone.Text;
+                        owner.FullName = txtOwnerName.Text;
+                        owner.Phone =txtOwnerPhone.Text;
                     }
 
                     _dbContext.SaveChanges();
@@ -198,9 +201,9 @@ namespace WinForms.CarsService
             };
 
             //----------------------------------------
-            _formAddOwner.Controls.Add(_txtOwnerPhone);
+            _formAddOwner.Controls.Add(txtOwnerPhone);
             _formAddOwner.Controls.Add(lblPhone);
-            _formAddOwner.Controls.Add(_txtOwnerName);
+            _formAddOwner.Controls.Add(txtOwnerName);
             _formAddOwner.Controls.Add(lblName);
             _formAddOwner.Controls.Add(but);
 
@@ -212,9 +215,12 @@ namespace WinForms.CarsService
             var owner = GetCurrentOwner();
             if (owner != null)
             {
-                _dbContext.Owners.Remove(owner);
-                _dbContext.SaveChanges();
-                LoadOwners();
+                if (MessageBox.Show("Are you sure?\nDeleting an owner deletes their cars!", "Delete owner", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    _dbContext.Owners.Remove(owner);
+                    _dbContext.SaveChanges();
+                    LoadOwners();
+                }
             }
             else
                 MessageBox.Show("Row isn't selected!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);

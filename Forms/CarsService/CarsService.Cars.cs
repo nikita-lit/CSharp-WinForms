@@ -1,16 +1,10 @@
-﻿using SQLitePCL;
-using System.Windows.Forms;
-using WinForms.CarsService.Models;
+﻿using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
 {
     public partial class CarsService
     {
         private TableLayoutPanel _tlpCars;
-        private TextBox _txtCarBrand;
-        private TextBox _txtCarModel;
-        private ComboBox _cbCarOwner;
-        private NumericUpDown _numCarRegNum;
         private Form _formAddCar;
         private int _currentCarRow = -1;
 
@@ -20,12 +14,12 @@ namespace WinForms.CarsService
             panel.Dock = DockStyle.Top;
             panel.Height = 300;
             panel.AutoScroll = true;
+            panel.BackColor = Colors.TableBackground;
 
             _tlpCars = new();
-            _tlpCars.BackColor = Color.FromArgb(100, 100, 100);
+            _tlpCars.BackColor = Colors.TableBackground;
             _tlpCars.AutoSize = true;
-            _tlpCars.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            _tlpCars.Dock = DockStyle.Fill;
+            _tlpCars.Dock = DockStyle.Top;
 
             panel.Controls.Add(_tlpCars);
 
@@ -49,6 +43,9 @@ namespace WinForms.CarsService
 
         private void LoadCars()
         {
+            if (_tlpCars == null)
+                return;
+
             _tlpCars.Controls.Clear();
             _tlpCars.RowStyles.Clear();
             _tlpCars.ColumnStyles.Clear();
@@ -164,7 +161,7 @@ namespace WinForms.CarsService
 
             _formAddCar = new();
             _formAddCar.Text = $"Car Service - {(isCarValid ? "Update" : "Add")} Car";
-            _formAddCar.Size = new Size(270, 370);
+            _formAddCar.Size = new Size(270, 450);
             _formAddCar.Padding = new Padding(20);
             _formAddCar.FormBorderStyle = FormBorderStyle.FixedSingle;
             _formAddCar.MinimizeBox = false;
@@ -180,10 +177,10 @@ namespace WinForms.CarsService
             lblBrand.Width = 80;
             lblBrand.ForeColor = Colors.Text;
 
-            _txtCarBrand = new();
-            _txtCarBrand.Dock = DockStyle.Top;
+            TextBox txtCarBrand = new();
+            txtCarBrand.Dock = DockStyle.Top;
             if (isCarValid)
-                _txtCarBrand.Text = car.Brand;
+                txtCarBrand.Text = car.Brand;
 
             //----------------------------------------
             Label lblModel = new();
@@ -193,10 +190,10 @@ namespace WinForms.CarsService
             lblModel.Width = 80;
             lblModel.ForeColor = Colors.Text;
 
-            _txtCarModel = new();
-            _txtCarModel.Dock = DockStyle.Top;
+            TextBox txtCarModel = new();
+            txtCarModel.Dock = DockStyle.Top;
             if (isCarValid)
-                _txtCarModel.Text = car.Model;
+                txtCarModel.Text = car.Model;
 
             //----------------------------------------
             Label lblOwner = new();
@@ -206,11 +203,92 @@ namespace WinForms.CarsService
             lblOwner.Width = 80;
             lblOwner.ForeColor = Colors.Text;
 
-            _cbCarOwner = new();
-            _cbCarOwner.Dock = DockStyle.Top;
-            _cbCarOwner.Items.AddRange(_dbContext.Owners.ToArray());
-            if (isCarValid)
-                _cbCarOwner.SelectedItem = car.Owner;
+            TextBox txtOwnerSearch = new();
+            txtOwnerSearch.Dock = DockStyle.Top;
+            txtOwnerSearch.PlaceholderText = "Search owner...";
+
+            Owner owner = null;
+            if (car != null)
+            {
+                owner = car.Owner;
+                txtOwnerSearch.Text = owner.FullName;
+            }
+
+            TableLayoutPanel tlpOwnerResults = new();
+            tlpOwnerResults.Dock = DockStyle.Top;
+            tlpOwnerResults.Visible = false;
+            tlpOwnerResults.BackColor = Colors.Background;
+            tlpOwnerResults.ForeColor = Colors.Text;
+            tlpOwnerResults.AutoSize = false;
+            tlpOwnerResults.AutoScroll = true;
+            tlpOwnerResults.ColumnCount = 1;
+            tlpOwnerResults.Height = 150;
+            tlpOwnerResults.Paint += (sender, e) => {
+                using (Pen pen = new Pen(Colors.Header, 2))
+                    e.Graphics.DrawRectangle(pen, new Rectangle(0, 0, tlpOwnerResults.Width - 2, tlpOwnerResults.Height - 2));
+            };
+
+            void AddOwnerRow(Owner o)
+            {
+                Label lbl = new();
+                lbl.Text = $"{o.FullName} - {o.Phone}";
+                lbl.ForeColor = Colors.Text;
+                lbl.BackColor = Colors.Row;
+                lbl.Padding = new Padding(5);
+                lbl.Dock = DockStyle.Top;
+                lbl.Cursor = Cursors.Hand;
+                lbl.AutoSize = true;
+
+                lbl.Click += (s, e) =>
+                {
+                    owner = o;
+                    txtOwnerSearch.Text = o.FullName;
+                    tlpOwnerResults.Visible = false;
+                };
+
+                lbl.Paint += (sender, e) => {
+                    var but = sender as Button;
+                    using (Pen pen = new Pen(Colors.Header, 2))
+                        e.Graphics.DrawRectangle(pen, new Rectangle(0, 0, lbl.Width - 1, lbl.Height - 1));
+                };
+
+                tlpOwnerResults.RowCount++;
+                tlpOwnerResults.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+                tlpOwnerResults.Controls.Add(lbl, 0, tlpOwnerResults.RowCount - 1);
+
+                ShowScrollBar(tlpOwnerResults.Handle, SB_BOTH, false);
+            }
+
+            var owners = _dbContext.Owners;
+            if (owner == null && owners.Count() > 0)
+            {
+                tlpOwnerResults.Visible = true;
+                foreach (var o in owners)
+                    AddOwnerRow(o);
+            }
+
+            txtOwnerSearch.TextChanged += (s, e) =>
+            {
+                string text = txtOwnerSearch.Text.Trim().ToLower();
+
+                var results = _dbContext.Owners
+                    .Where(o => o.FullName.ToLower().Contains(text) || o.Phone.ToLower().Contains(text))
+                    .ToList();
+
+                tlpOwnerResults.Controls.Clear();
+                tlpOwnerResults.RowStyles.Clear();
+                tlpOwnerResults.RowCount = 0;
+
+                if (results.Count > 0)
+                {
+                    tlpOwnerResults.Visible = true;
+
+                    foreach (var o in results)
+                        AddOwnerRow(o);
+                }
+                else
+                    tlpOwnerResults.Visible = false;
+            };
 
             //----------------------------------------
             Label lblRegNum = new();
@@ -220,12 +298,12 @@ namespace WinForms.CarsService
             lblRegNum.Width = 80;
             lblRegNum.ForeColor = Colors.Text;
 
-            _numCarRegNum = new();
-            _numCarRegNum.Dock = DockStyle.Top;
-            _numCarRegNum.Maximum = int.MaxValue;
-            _numCarRegNum.Minimum = 0;
+            NumericUpDown numCarRegNum = new();
+            numCarRegNum.Dock = DockStyle.Top;
+            numCarRegNum.Maximum = int.MaxValue;
+            numCarRegNum.Minimum = 0;
             if (isCarValid)
-                _numCarRegNum.Value = car.RegistrationNumber;
+                numCarRegNum.Value = car.RegistrationNumber;
 
             //----------------------------------------
             Button but = new();
@@ -233,10 +311,9 @@ namespace WinForms.CarsService
             but.Dock = DockStyle.Bottom;
             SetupButtonStyle(but);
             but.Click += (sender, e) => {
-                var brand = _txtCarBrand.Text;
-                var model = _txtCarModel.Text;
-                var regNum = Convert.ToInt32(_numCarRegNum.Value);
-                var owner = _cbCarOwner.SelectedItem as Owner;
+                var brand = txtCarBrand.Text;
+                var model = txtCarModel.Text;
+                var regNum = Convert.ToInt32(numCarRegNum.Value);
 
                 bool isValid = !string.IsNullOrWhiteSpace(brand) 
                     && !string.IsNullOrWhiteSpace(model)
@@ -265,16 +342,17 @@ namespace WinForms.CarsService
             };
 
             //----------------------------------------
-            _formAddCar.Controls.Add(_numCarRegNum);
+            _formAddCar.Controls.Add(numCarRegNum);
             _formAddCar.Controls.Add(lblRegNum);
 
-            _formAddCar.Controls.Add(_txtCarModel);
+            _formAddCar.Controls.Add(txtCarModel);
             _formAddCar.Controls.Add(lblModel);
 
-            _formAddCar.Controls.Add(_txtCarBrand);
+            _formAddCar.Controls.Add(txtCarBrand);
             _formAddCar.Controls.Add(lblBrand);
 
-            _formAddCar.Controls.Add(_cbCarOwner);
+            _formAddCar.Controls.Add(tlpOwnerResults);
+            _formAddCar.Controls.Add(txtOwnerSearch);
             _formAddCar.Controls.Add(lblOwner);
             _formAddCar.Controls.Add(but);
 
@@ -286,9 +364,12 @@ namespace WinForms.CarsService
             var car = GetCurrentCar();
             if (car != null)
             {
-                _dbContext.Cars.Remove(car);
-                _dbContext.SaveChanges();
-                LoadCars();
+                if (MessageBox.Show("Are you sure?", "Delete car", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    _dbContext.Cars.Remove(car);
+                    _dbContext.SaveChanges();
+                    LoadCars();
+                }
             }
             else
                 MessageBox.Show("Row isn't selected!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);

@@ -33,13 +33,11 @@ namespace WinForms.CarsService
             SetupCarsTab(cars);
             _tabControl.AddTab(cars);
 
-            //TabPage services = new("Services");
-            //SetupServicesTab(services);
-            //_tabControl.TabPages.Add(services);
-
-            //TabPage carServices = new("Car Services");
-            //SetupServicesTab(services);
-            //_tabControl.TabPages.Add(carServices);
+            Panel services = new();
+            services.Text = "Services";
+            services.BackColor = Colors.Background;
+            SetupServicesTab(services);
+            _tabControl.AddTab(services);
 
             MakeDark(Handle);
             Controls.Add(_tabControl);
@@ -50,7 +48,8 @@ namespace WinForms.CarsService
             Panel panel = new();
             panel.Dock = DockStyle.Top;
             panel.Height = 30;
-            panel.Padding = new Padding(5, 5, 0, 0);
+            panel.Width = 200;
+            panel.Padding = new Padding(2);
 
             Button butAdd = new();
             butAdd.Text = "Add";
@@ -70,8 +69,18 @@ namespace WinForms.CarsService
             butDelete.Click += delete;
             SetupButtonStyle(butDelete);
 
+            Panel spacer = new();
+            spacer.Width = 5;
+            spacer.Dock = DockStyle.Left;
+
+            Panel spacer2 = new();
+            spacer2.Width = 5;
+            spacer2.Dock = DockStyle.Left;
+
             panel.Controls.Add(butDelete);
+            panel.Controls.Add(spacer);
             panel.Controls.Add(butUpdate);
+            panel.Controls.Add(spacer2);
             panel.Controls.Add(butAdd);
 
             return panel;
@@ -102,5 +111,10 @@ namespace WinForms.CarsService
         public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
         private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+
+        [DllImport("user32.dll")]
+        private static extern int ShowScrollBar(IntPtr hWnd, int wBar, bool bShow);
+
+        private const int SB_BOTH = 3;
     }
 }
