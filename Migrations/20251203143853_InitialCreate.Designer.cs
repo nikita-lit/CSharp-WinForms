@@ -10,7 +10,7 @@ using WinForms.CarsService;
 
 namespace WinForms.Migrations
 {
-    [DbContext(typeof(CarsServiceDbContext))]
+    [DbContext(typeof(CarsService.CarsServiceDbContext))]
     [Migration("20251203143853_InitialCreate")]
     partial class InitialCreate
     {

@@ -9,7 +9,7 @@ using WinForms.CarsService;
 
 namespace WinForms.Migrations
 {
-    [DbContext(typeof(CarsServiceDbContext))]
+    [DbContext(typeof(CarsService.CarsServiceDbContext))]
     partial class CarsServiceDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

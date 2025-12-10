@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using SQLitePCL;
+using System.Windows.Forms;
 using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
@@ -65,16 +66,16 @@ namespace WinForms.CarsService
 
                 Label lblHeader = new Label();
                 lblHeader.Text = header;
-                lblHeader.Dock = DockStyle.Fill;
+                lblHeader.Dock = DockStyle.Top;
                 lblHeader.TextAlign = ContentAlignment.MiddleCenter;
-                lblHeader.BackColor = HeaderColor;
-                lblHeader.ForeColor = TextColor;
+                lblHeader.BackColor = Colors.Header;
+                lblHeader.ForeColor = Colors.Text;
                 lblHeader.Margin = new Padding(3);
                 lblHeader.Font = new Font(lblHeader.Font, FontStyle.Bold);
 
                 lblHeader.Paint += (sender, e) =>
                 {
-                    using (Pen pen = new Pen(HeaderLineColor, 1))
+                    using (Pen pen = new Pen(Colors.HeaderLine, 1))
                         e.Graphics.DrawLine(pen, 0, lblHeader.Height - 1, lblHeader.Width, lblHeader.Height - 1);
                 };
 
@@ -91,19 +92,27 @@ namespace WinForms.CarsService
 
                 Label CreateLabel(string text, int row)
                 {
-                    var color = (row % 2 == 0) ? RowColor : RowAltColor;
                     Label label = new Label();
                     label.Text = text;
                     label.Dock = DockStyle.Top;
                     label.TextAlign = ContentAlignment.MiddleCenter;
-                    label.BackColor = color;
-                    label.ForeColor = TextColor;
+                    label.BackColor = Colors.Row;
+                    label.ForeColor = Colors.Text;
                     label.Margin = new Padding(3);
+                    label.Font = new Font("Arial", 12);
 
                     label.Click += (s, e) =>
                     {
-                        HighlightRow(row + 1, color, HighlightColor);
-                        _currentCarRow = row;
+                        if (row != _currentCarRow)
+                        {
+                            _currentCarRow = row;
+                            HighlightRow(_tlpCars, row + 1);
+                        }
+                        else
+                        {
+                            _currentCarRow = -1;
+                            RemoveRowsHighlight(_tlpCars);
+                        }
                     };
 
                     return label;
@@ -127,17 +136,26 @@ namespace WinForms.CarsService
             return null;
         }
 
-        private void HighlightRow(int row, Color color, Color defColor)
+        private void HighlightRow(TableLayoutPanel panel, int row)
         {
-            for (int r = 1; r < _tlpCars.RowCount; r++)
-            {
-                for (int c = 0; c < _tlpCars.ColumnCount; c++)
+            for (int r = 1; r < panel.RowCount; r++)
+                for (int c = 0; c < panel.ColumnCount; c++)
                 {
-                    Control control = _tlpCars.GetControlFromPosition(c, r);
+                    Control control = panel.GetControlFromPosition(c, r);
                     if (control != null)
-                        control.BackColor = r == row ? defColor : color;
+                        control.BackColor = r == row ? Colors.Highlight : Colors.Row;
                 }
-            }
+        }
+
+        private void RemoveRowsHighlight(TableLayoutPanel panel)
+        {
+            for (int r = 1; r < panel.RowCount; r++)
+                for (int c = 0; c < panel.ColumnCount; c++)
+                {
+                    Control control = panel.GetControlFromPosition(c, r);
+                    if (control != null)
+                        control.BackColor = Colors.Row;
+                }
         }
 
         private void OpenCarForm(Car car = null)
@@ -151,6 +169,8 @@ namespace WinForms.CarsService
             _formAddCar.FormBorderStyle = FormBorderStyle.FixedSingle;
             _formAddCar.MinimizeBox = false;
             _formAddCar.MaximizeBox = false;
+            _formAddCar.BackColor = Colors.Background;
+            MakeDark(_formAddCar.Handle);
 
             //----------------------------------------
             Label lblBrand = new();
@@ -158,6 +178,7 @@ namespace WinForms.CarsService
             lblBrand.Dock = DockStyle.Top;
             lblBrand.TextAlign = ContentAlignment.MiddleLeft;
             lblBrand.Width = 80;
+            lblBrand.ForeColor = Colors.Text;
 
             _txtCarBrand = new();
             _txtCarBrand.Dock = DockStyle.Top;
@@ -170,6 +191,7 @@ namespace WinForms.CarsService
             lblModel.Dock = DockStyle.Top;
             lblModel.TextAlign = ContentAlignment.MiddleLeft;
             lblModel.Width = 80;
+            lblModel.ForeColor = Colors.Text;
 
             _txtCarModel = new();
             _txtCarModel.Dock = DockStyle.Top;
@@ -182,6 +204,7 @@ namespace WinForms.CarsService
             lblOwner.Dock = DockStyle.Top;
             lblOwner.TextAlign = ContentAlignment.MiddleLeft;
             lblOwner.Width = 80;
+            lblOwner.ForeColor = Colors.Text;
 
             _cbCarOwner = new();
             _cbCarOwner.Dock = DockStyle.Top;
@@ -195,6 +218,7 @@ namespace WinForms.CarsService
             lblRegNum.Dock = DockStyle.Top;
             lblRegNum.TextAlign = ContentAlignment.MiddleLeft;
             lblRegNum.Width = 80;
+            lblRegNum.ForeColor = Colors.Text;
 
             _numCarRegNum = new();
             _numCarRegNum.Dock = DockStyle.Top;
@@ -207,6 +231,7 @@ namespace WinForms.CarsService
             Button but = new();
             but.Text = (isCarValid ? "Update" : "Add");
             but.Dock = DockStyle.Bottom;
+            SetupButtonStyle(but);
             but.Click += (sender, e) => {
                 var brand = _txtCarBrand.Text;
                 var model = _txtCarModel.Text;

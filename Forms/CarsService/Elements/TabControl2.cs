@@ -26,12 +26,12 @@
             _headerPanel.Height = 30;
             _headerPanel.BackColor = _headerBg;
             _headerPanel.FlowDirection = FlowDirection.LeftToRight;
-            Controls.Add(_headerPanel);
 
             _contentPanel = new();
             _contentPanel.Dock = DockStyle.Fill;
             _contentPanel.BackColor = _contentBg;
             Controls.Add(_contentPanel);
+            Controls.Add(_headerPanel);
         }
 
         public void AddTab(Panel tabPage)
@@ -48,9 +48,15 @@
             butTab.FlatAppearance.BorderSize = 0;
             butTab.Margin = new Padding(0);
             butTab.ForeColor = Color.White;
+            butTab.Font = new Font("Arial", 10, FontStyle.Bold);
             butTab.Click += (sender, e) => {
                 if (sender is Button btn && btn.Tag is int index)
                     SelectTab(index);
+            };
+            butTab.Paint += (sender, e) => {
+                if (butTab.Tag is int index && _selectedIndex == index)
+                    using (Pen pen = new Pen(_bugBgActive, 1))
+                        e.Graphics.DrawRectangle(pen, new Rectangle(2, 2, butTab.Width - 4, butTab.Height - 4));
             };
 
             _headerPanel.Controls.Add(butTab);
@@ -70,7 +76,7 @@
             _selectedIndex = index;
 
             foreach (Button btn in _headerPanel.Controls)
-                btn.BackColor = (int)btn.Tag == index ? _bugBgActive : _butBgColor;
+                btn.BackColor = (int)btn.Tag == index ? _contentBg : _butBgColor;
         }
     }
 }

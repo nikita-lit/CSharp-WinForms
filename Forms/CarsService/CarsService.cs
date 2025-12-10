@@ -1,6 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Runtime.InteropServices;
 using WinForms.CarsService.Elements;
-using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
 {
@@ -15,21 +14,22 @@ namespace WinForms.CarsService
             Directory.CreateDirectory(folder);
 
             Text = "Cars Service";
-            Size = new Size(750, 550);
-            BackColor = BackgroundColor;
+            Size = new Size(950, 550);
+            BackColor = Colors.Background;
+            Padding = new Padding(5);
 
-            _tabControl = new(HeaderColor, BackgroundColor, RowColor, HeaderLineColor);
+            _tabControl = new(Colors.Header, Colors.Background, Colors.Row, Colors.HeaderLine);
             _tabControl.Dock = DockStyle.Fill;
 
             Panel owners = new();
             owners.Text = "Owners";
-            owners.BackColor = BackgroundColor;
+            owners.BackColor = Colors.Background;
             SetupOwnersTab(owners);
             _tabControl.AddTab(owners);
 
             Panel cars = new();
             cars.Text = "Cars";
-            cars.BackColor = BackgroundColor;
+            cars.BackColor = Colors.Background;
             SetupCarsTab(cars);
             _tabControl.AddTab(cars);
 
@@ -41,6 +41,7 @@ namespace WinForms.CarsService
             //SetupServicesTab(services);
             //_tabControl.TabPages.Add(carServices);
 
+            MakeDark(Handle);
             Controls.Add(_tabControl);
         }
 
@@ -55,16 +56,19 @@ namespace WinForms.CarsService
             butAdd.Text = "Add";
             butAdd.Dock = DockStyle.Left;
             butAdd.Click += add;
+            SetupButtonStyle(butAdd);
 
             Button butUpdate = new();
             butUpdate.Text = "Update";
             butUpdate.Dock = DockStyle.Left;
             butUpdate.Click += update;
+            SetupButtonStyle(butUpdate);
 
             Button butDelete = new();
             butDelete.Text = "Delete";
             butDelete.Dock = DockStyle.Left;
             butDelete.Click += delete;
+            SetupButtonStyle(butDelete);
 
             panel.Controls.Add(butDelete);
             panel.Controls.Add(butUpdate);
@@ -72,5 +76,31 @@ namespace WinForms.CarsService
 
             return panel;
         }
+
+        public static void SetupButtonStyle(Button but)
+        {
+            but.FlatStyle = FlatStyle.Flat;
+            but.FlatAppearance.MouseOverBackColor = Colors.ButtonHover;
+            but.FlatAppearance.MouseDownBackColor = Colors.ButtonPressed;
+            but.FlatAppearance.BorderSize = 0;
+            but.BackColor = Colors.Button;
+            but.ForeColor = Colors.Text;
+            but.Paint += (sender, e) => {
+                var but = sender as Button;
+                using (Pen pen = new Pen(Colors.Header, 1))
+                    e.Graphics.DrawRectangle(pen, new Rectangle(1, 1, but.Width - 3, but.Height - 3));
+            };
+        }
+
+        public static void MakeDark(IntPtr hwnd)
+        {
+            int useDark = 1;
+            DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref useDark, sizeof(int));
+        }
+
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
     }
 }
