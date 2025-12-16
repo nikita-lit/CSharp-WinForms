@@ -9,6 +9,7 @@ namespace WinForms.CarsService
         public DbSet<Car> Cars { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<CarService> CarServices { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -35,6 +36,8 @@ namespace WinForms.CarsService
                 .HasOne(cs => cs.Service)
                 .WithMany(s => s.CarServices)
                 .HasForeignKey(cs => cs.ServiceId);
+
+            modelBuilder.Entity<User>();
         }
     }
 }

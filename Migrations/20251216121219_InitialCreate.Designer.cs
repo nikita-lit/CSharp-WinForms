@@ -10,8 +10,8 @@ using WinForms.CarsService;
 
 namespace WinForms.Migrations
 {
-    [DbContext(typeof(CarsService.CarsServiceDbContext))]
-    [Migration("20251203143853_InitialCreate")]
+    [DbContext(typeof(CarsServiceDbContext))]
+    [Migration("20251216121219_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -56,9 +56,6 @@ namespace WinForms.Migrations
                     b.Property<DateTime>("DateOfService")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Mileage")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("CarId", "ServiceId", "DateOfService");
 
                     b.HasIndex("ServiceId");
@@ -98,6 +95,23 @@ namespace WinForms.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("WinForms.CarsService.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("WinForms.CarsService.Models.Car", b =>

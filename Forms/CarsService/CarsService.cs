@@ -1,5 +1,4 @@
-﻿using PdfSharp.Charting;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using WinForms.CarsService.Elements;
 
 namespace WinForms.CarsService
@@ -87,6 +86,12 @@ namespace WinForms.CarsService
             services.BackColor = Colors.Background;
             SetupServicesTab(services);
             _tabControl.AddTab(services);
+
+            Panel users = new();
+            users.Text = "users";
+            users.BackColor = Colors.Background;
+            SetupUsersTab(users);
+            _tabControl.AddTab(users);
 
             MakeDark(Handle);
             Controls.Add(_tabControl);

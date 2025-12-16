@@ -36,6 +36,8 @@
                         ["car"] = "Car",
                         ["services"] = "Services",
                         ["service"] = "Service",
+                        ["users"] = "Users",
+                        ["user"] = "user",
                         ["add"] = "Add",
                         ["update"] = "Update",
                         ["delete"] = "Delete",
@@ -56,6 +58,12 @@
                         ["registrationnumber"] = "Registration Number",
                         ["name"] = "Name",
                         ["price"] = "Price",
+                        ["user_name"] = "Name",
+                        ["role"] = "Role",
+
+                        ["admin"] = "Admin",
+                        ["worker"] = "Worker",
+                        ["customer"] = "Customer",
                     }
                 },
                 {
@@ -68,6 +76,8 @@
                         ["car"] = "Auto",
                         ["services"] = "Teenused",
                         ["service"] = "Teenus",
+                        ["users"] = "Kasutaja",
+                        ["user"] = "Kasutajad",
                         ["add"] = "Lisa",
                         ["update"] = "Uuenda",
                         ["delete"] = "Kustuta",
@@ -88,6 +98,12 @@
                         ["registrationnumber"] = "Registreerimisnumber",
                         ["name"] = "Nimi",
                         ["price"] = "Hind",
+                        ["user_name"] = "Nimi",
+                        ["role"] = "Roll",
+
+                        ["admin"] = "Admin",
+                        ["worker"] = "Töötaja",
+                        ["customer"] = "Klient",
                     }
                 },
                 {
@@ -100,6 +116,8 @@
                         ["car"] = "Машина",
                         ["services"] = "Услуги",
                         ["service"] = "Услуга",
+                        ["users"] = "Пользователи",
+                        ["user"] = "Пользователь",
                         ["add"] = "Добавить",
                         ["update"] = "Обновить",
                         ["delete"] = "Удалить",
@@ -120,13 +138,19 @@
                         ["registrationnumber"] = "Регистрационный номер",
                         ["name"] = "Название",
                         ["price"] = "Цена",
+                        ["user_name"] = "Имя",
+                        ["role"] = "Роль",
+
+                        ["admin"] = "Администратор",
+                        ["worker"] = "Работник",
+                        ["customer"] = "Клиент",
                     }
                 }
             };
 
         public static string Get(string id)
         {
-            if (Translations[CurrentLanguage].TryGetValue(id, out var value))
+            if (Translations[CurrentLanguage].TryGetValue(id.ToLower(), out var value))
                 return value;
 
             return id;

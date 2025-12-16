@@ -44,7 +44,7 @@ namespace WinForms.CarsService.Elements
             Button butTab = new();
             butTab.Text = LanguageManager.Get(tabPage.Text);
             butTab.Tag = _tabPages.Count - 1;
-            butTab.Width = 120;
+            butTab.Width = 150;
             butTab.Height = _headerPanel.Height;
             butTab.FlatStyle = FlatStyle.Flat;
             butTab.FlatAppearance.BorderSize = 0;

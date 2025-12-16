@@ -40,6 +40,20 @@ namespace WinForms.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Role = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Cars",
                 columns: table => new
                 {
@@ -67,8 +81,7 @@ namespace WinForms.Migrations
                 {
                     CarId = table.Column<int>(type: "INTEGER", nullable: false),
                     ServiceId = table.Column<int>(type: "INTEGER", nullable: false),
-                    DateOfService = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Mileage = table.Column<int>(type: "INTEGER", nullable: false)
+                    DateOfService = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -103,6 +116,9 @@ namespace WinForms.Migrations
         {
             migrationBuilder.DropTable(
                 name: "CarServices");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Cars");
