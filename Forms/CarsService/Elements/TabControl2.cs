@@ -1,4 +1,6 @@
-﻿namespace WinForms.CarsService.Elements
+﻿using WinForms.CarsService.Models;
+
+namespace WinForms.CarsService.Elements
 {
     public class TabControl2 : UserControl
     {
@@ -40,9 +42,9 @@
             _tabPages.Add(tabPage);
 
             Button butTab = new();
-            butTab.Text = tabPage.Text;
+            butTab.Text = LanguageManager.Get(tabPage.Text);
             butTab.Tag = _tabPages.Count - 1;
-            butTab.Width = 100;
+            butTab.Width = 120;
             butTab.Height = _headerPanel.Height;
             butTab.FlatStyle = FlatStyle.Flat;
             butTab.FlatAppearance.BorderSize = 0;
@@ -57,6 +59,10 @@
                 if (butTab.Tag is int index && _selectedIndex == index)
                     using (Pen pen = new Pen(_bugBgActive, 1))
                         e.Graphics.DrawRectangle(pen, new Rectangle(2, 2, butTab.Width - 4, butTab.Height - 4));
+            };
+
+            LanguageManager.LanguageChanged += () => {
+                butTab.Text = LanguageManager.Get(tabPage.Text);
             };
 
             _headerPanel.Controls.Add(butTab);

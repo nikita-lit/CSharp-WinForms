@@ -9,6 +9,5 @@
         public Service Service { get; set; }
 
         public DateTime DateOfService { get; set; }
-        public int Mileage { get; set; }
     }
 }

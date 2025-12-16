@@ -32,16 +32,21 @@ namespace WinForms.CarsService
                 if (car != null)
                     OpenCarForm(car);
                 else
-                    MessageBox.Show("Row isn't selected!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(LanguageManager.Get("row_not_selected"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             };
 
-            cars.Controls.Add(SetupButtonsPanel(add, update, butDeleteCar_Click));
+            Panel spacer = new();
+            spacer.Height = 7;
+            spacer.Dock = DockStyle.Top;
+
+            cars.Controls.Add(SetupButtonsPanel(add, update, butDeleteCar_Click, LoadCars));
+            cars.Controls.Add(spacer);
             cars.Controls.Add(panel);
 
             LoadCars();
         }
 
-        private void LoadCars()
+        private void LoadCars(string search = "")
         {
             if (_tlpCars == null)
                 return;
@@ -50,19 +55,19 @@ namespace WinForms.CarsService
             _tlpCars.RowStyles.Clear();
             _tlpCars.ColumnStyles.Clear();
 
-            string[] headers = { "Id", "Brand", "Model", "RegistrationNumber", "Owner" };
+            string[] headers = { "id", "brand", "model", "registrationnumber", "owner" };
             _tlpCars.ColumnCount = headers.Length;
 
             for (int i = 0; i < headers.Length; i++)
             {
                 var header = headers[i];
-                if (header == "Id")
+                if (header == "id")
                     _tlpCars.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 5.0f));
                 else
                     _tlpCars.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20.0f));
 
                 Label lblHeader = new Label();
-                lblHeader.Text = header;
+                lblHeader.Text = LanguageManager.Get(header);
                 lblHeader.Dock = DockStyle.Top;
                 lblHeader.TextAlign = ContentAlignment.MiddleCenter;
                 lblHeader.BackColor = Colors.Header;
@@ -76,10 +81,20 @@ namespace WinForms.CarsService
                         e.Graphics.DrawLine(pen, 0, lblHeader.Height - 1, lblHeader.Width, lblHeader.Height - 1);
                 };
 
+                LanguageManager.LanguageChanged += () => {
+                    lblHeader.Text = LanguageManager.Get(header);
+                };
+
                 _tlpCars.Controls.Add(lblHeader, i, 0);
             }
 
-            var cars = _dbContext.Cars.ToList();
+            var cars = _dbContext.Cars
+                .Where(o => string.IsNullOrEmpty(search) ||
+                            o.Model.ToLower().Contains(search.ToLower()) ||
+                            o.Brand.ToLower().Contains(search.ToLower()) ||
+                            o.Owner.FullName.ToLower().Contains(search.ToLower()) ||
+                            o.RegistrationNumber.ToString().ToLower().Contains(search.ToLower()))
+                .ToList();
 
             _tlpCars.RowCount = cars.Count + 1;
             for (int row = 0; row < cars.Count; row++)
@@ -158,10 +173,11 @@ namespace WinForms.CarsService
         private void OpenCarForm(Car car = null)
         {
             bool isCarValid = car != null;
+            string t = (isCarValid ? LanguageManager.Get("update") : LanguageManager.Get("add"));
 
             _formAddCar = new();
-            _formAddCar.Text = $"Car Service - {(isCarValid ? "Update" : "Add")} Car";
-            _formAddCar.Size = new Size(270, 450);
+            _formAddCar.Text = $"{LanguageManager.Get("car_service")} - {t} {LanguageManager.Get("car")}";
+            _formAddCar.Size = new Size(270, 500);
             _formAddCar.Padding = new Padding(20);
             _formAddCar.FormBorderStyle = FormBorderStyle.FixedSingle;
             _formAddCar.MinimizeBox = false;
@@ -171,7 +187,7 @@ namespace WinForms.CarsService
 
             //----------------------------------------
             Label lblBrand = new();
-            lblBrand.Text = "Brand:";
+            lblBrand.Text = LanguageManager.Get("brand") + ":";
             lblBrand.Dock = DockStyle.Top;
             lblBrand.TextAlign = ContentAlignment.MiddleLeft;
             lblBrand.Width = 80;
@@ -184,7 +200,7 @@ namespace WinForms.CarsService
 
             //----------------------------------------
             Label lblModel = new();
-            lblModel.Text = "Model:";
+            lblModel.Text = LanguageManager.Get("model") + ":";
             lblModel.Dock = DockStyle.Top;
             lblModel.TextAlign = ContentAlignment.MiddleLeft;
             lblModel.Width = 80;
@@ -197,7 +213,7 @@ namespace WinForms.CarsService
 
             //----------------------------------------
             Label lblOwner = new();
-            lblOwner.Text = "Owner:";
+            lblOwner.Text = LanguageManager.Get("owner") + ":";
             lblOwner.Dock = DockStyle.Top;
             lblOwner.TextAlign = ContentAlignment.MiddleLeft;
             lblOwner.Width = 80;
@@ -205,7 +221,7 @@ namespace WinForms.CarsService
 
             TextBox txtOwnerSearch = new();
             txtOwnerSearch.Dock = DockStyle.Top;
-            txtOwnerSearch.PlaceholderText = "Search owner...";
+            txtOwnerSearch.PlaceholderText = LanguageManager.Get("search_owner") + "...";
 
             Owner owner = null;
             if (car != null)
@@ -292,7 +308,7 @@ namespace WinForms.CarsService
 
             //----------------------------------------
             Label lblRegNum = new();
-            lblRegNum.Text = "Registration Number:";
+            lblRegNum.Text = LanguageManager.Get("registrationnumber") + ":";
             lblRegNum.Dock = DockStyle.Top;
             lblRegNum.TextAlign = ContentAlignment.MiddleLeft;
             lblRegNum.Width = 80;
@@ -307,8 +323,9 @@ namespace WinForms.CarsService
 
             //----------------------------------------
             Button but = new();
-            but.Text = (isCarValid ? "Update" : "Add");
+            but.Text = t;
             but.Dock = DockStyle.Bottom;
+            but.Height = 30;
             SetupButtonStyle(but);
             but.Click += (sender, e) => {
                 var brand = txtCarBrand.Text;
@@ -338,7 +355,7 @@ namespace WinForms.CarsService
                     LoadCars();
                 }
                 else
-                    MessageBox.Show("Data is invalid!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(LanguageManager.Get("invalid"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             };
 
             //----------------------------------------
@@ -364,7 +381,7 @@ namespace WinForms.CarsService
             var car = GetCurrentCar();
             if (car != null)
             {
-                if (MessageBox.Show("Are you sure?", "Delete car", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show(LanguageManager.Get("are_you_sure"), LanguageManager.Get("warning"), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     _dbContext.Cars.Remove(car);
                     _dbContext.SaveChanges();
@@ -372,7 +389,7 @@ namespace WinForms.CarsService
                 }
             }
             else
-                MessageBox.Show("Row isn't selected!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(LanguageManager.Get("row_not_selected"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
     }
 }

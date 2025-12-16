@@ -32,16 +32,21 @@ namespace WinForms.CarsService
                 if (owner != null)
                     OpenOwnerForm(owner);
                 else
-                    MessageBox.Show("Row isn't selected!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(LanguageManager.Get("row_not_selected"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             };
 
-            owners.Controls.Add(SetupButtonsPanel(add, update, butDeleteOwner_Click));
+            Panel spacer = new();
+            spacer.Height = 7;
+            spacer.Dock = DockStyle.Top;
+
+            owners.Controls.Add(SetupButtonsPanel(add, update, butDeleteOwner_Click, LoadOwners));
+            owners.Controls.Add(spacer);
             owners.Controls.Add(panel);
 
             LoadOwners();
         }
 
-        private void LoadOwners()
+        private void LoadOwners(string search = "")
         {
             if (_tlpOwners == null)
                 return;
@@ -50,19 +55,19 @@ namespace WinForms.CarsService
             _tlpOwners.RowStyles.Clear();
             _tlpOwners.ColumnStyles.Clear();
 
-            string[] headers = { "Id", "FullName", "Phone" };
+            string[] headers = { "id", "fullname", "phone" };
             _tlpOwners.ColumnCount = headers.Length;
 
             for (int i = 0; i < headers.Length; i++)
             {
                 var header = headers[i];
-                if (header == "Id")
+                if (header == "id")
                     _tlpOwners.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 5.0f));
                 else
                     _tlpOwners.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20.0f));
 
                 Label lblHeader = new Label();
-                lblHeader.Text = header;
+                lblHeader.Text = LanguageManager.Get(header);
                 lblHeader.Dock = DockStyle.Top;
                 lblHeader.TextAlign = ContentAlignment.MiddleCenter;
                 lblHeader.BackColor = Colors.Header;
@@ -76,10 +81,18 @@ namespace WinForms.CarsService
                         e.Graphics.DrawLine(pen, 0, lblHeader.Height - 1, lblHeader.Width, lblHeader.Height - 1);
                 };
 
+                LanguageManager.LanguageChanged += () => {
+                    lblHeader.Text = LanguageManager.Get(header);
+                };
+
                 _tlpOwners.Controls.Add(lblHeader, i, 0);
             }
 
-            var owners = _dbContext.Owners.ToList();
+            var owners = _dbContext.Owners
+                .Where(o => string.IsNullOrEmpty(search) ||
+                            o.FullName.ToLower().Contains(search.ToLower()) ||
+                            o.Phone.ToLower().Contains(search.ToLower()))
+                .ToList();
 
             _tlpOwners.RowCount = owners.Count + 1;
             for (int row = 0; row < owners.Count; row++)
@@ -136,9 +149,10 @@ namespace WinForms.CarsService
         private void OpenOwnerForm(Owner owner = null)
         {
             bool isOwnerValid = owner != null;
+            string t = (isOwnerValid ? LanguageManager.Get("update") : LanguageManager.Get("add"));
 
             _formAddOwner = new();
-            _formAddOwner.Text = $"Car Service - {(isOwnerValid ? "Update" : "Add")} Owner";
+            _formAddOwner.Text = $"{LanguageManager.Get("car_service")} - {t} {LanguageManager.Get("owner")}";
             _formAddOwner.Size = new Size(270, 370);
             _formAddOwner.Padding = new Padding(20);
             _formAddOwner.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -149,7 +163,7 @@ namespace WinForms.CarsService
 
             //----------------------------------------
             Label lblName = new();
-            lblName.Text = "Full Name:";
+            lblName.Text = LanguageManager.Get("fullname") + ":";
             lblName.Dock = DockStyle.Top;
             lblName.TextAlign = ContentAlignment.MiddleLeft;
             lblName.Width = 80;
@@ -162,7 +176,7 @@ namespace WinForms.CarsService
 
             //----------------------------------------
             Label lblPhone = new();
-            lblPhone.Text = "Phone Number:";
+            lblPhone.Text = LanguageManager.Get("phone") + ":";
             lblPhone.Dock = DockStyle.Top;
             lblPhone.TextAlign = ContentAlignment.MiddleLeft;
             lblPhone.Width = 80;
@@ -175,8 +189,9 @@ namespace WinForms.CarsService
 
             //----------------------------------------
             Button but = new();
-            but.Text = (isOwnerValid ? "Update" : "Add");
+            but.Text = t;
             but.Dock = DockStyle.Bottom;
+            but.Height = 30;
             SetupButtonStyle(but);
             but.Click += (sender, e) => {
                 bool isValid = !string.IsNullOrWhiteSpace(txtOwnerName.Text)
@@ -197,7 +212,7 @@ namespace WinForms.CarsService
                     LoadOwners();
                 }
                 else
-                    MessageBox.Show("Data is invalid!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(LanguageManager.Get("invalid"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             };
 
             //----------------------------------------
@@ -215,7 +230,7 @@ namespace WinForms.CarsService
             var owner = GetCurrentOwner();
             if (owner != null)
             {
-                if (MessageBox.Show("Are you sure?\nDeleting an owner deletes their cars!", "Delete owner", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show(LanguageManager.Get("are_you_sure_owner"), LanguageManager.Get("warning"), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     _dbContext.Owners.Remove(owner);
                     _dbContext.SaveChanges();
@@ -223,7 +238,7 @@ namespace WinForms.CarsService
                 }
             }
             else
-                MessageBox.Show("Row isn't selected!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(LanguageManager.Get("row_not_selected"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
     }
 }
