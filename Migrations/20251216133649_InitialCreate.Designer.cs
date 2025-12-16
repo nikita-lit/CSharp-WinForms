@@ -11,7 +11,7 @@ using WinForms.CarsService;
 namespace WinForms.Migrations
 {
     [DbContext(typeof(CarsServiceDbContext))]
-    [Migration("20251216121219_InitialCreate")]
+    [Migration("20251216133649_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -104,6 +104,9 @@ namespace WinForms.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Password")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Role")

@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using WinForms.CarsService.Elements;
+using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
 {
@@ -8,23 +9,58 @@ namespace WinForms.CarsService
         public CarsServiceDbContext _dbContext = new();
         public TabControl2 _tabControl;
 
+        private UserData _currentUserData;
+        private User _currentUser;
+
         // multi lang +
-        // car service
+        //  Запоминание выбранного языка между запусками.
         // search +
-        // подтверждение при удалении
-        // pdf
+        // pdf - email
         // Users
-        // Отображение общей выручки сервиса.
         // Иконки и улучшенное оформление вкладок.
-        // Запоминание выбранного языка между запусками.
-        // Уведомления о предстоящем обслуживании.
-        // Отображение количества автомобилей у владельца.
-        // Показ общей суммы обслуживания по автомобилю.
+
+        // car service
+        //  Отображение общей выручки сервиса.
+        //  Уведомления о предстоящем обслуживании.
+        //  Отображение количества автомобилей у владельца.
+        //  Показ общей суммы обслуживания по автомобилю.
+
+        public User GetSuperAdmin()
+        {
+            var list = _dbContext.Users.Where(x => x.Name == "superadmin" && x.Role == "superadmin").ToList();
+            if (list.Count > 0)
+                return list.First();
+
+            return null;
+        }
 
         public CarsService()
         {
-            string folder = Path.Combine(Environment.CurrentDirectory, "Databases");
-            Directory.CreateDirectory(folder);
+            Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Data"));
+            Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Databases"));
+
+            var superAdmin = GetSuperAdmin();
+            if (superAdmin == null)
+            {
+                var newSuperAdmin = new User()
+                {
+                    Name = "superadmin",
+                    Password = "1234",
+                    Role = "superadmin",
+                };
+
+                _dbContext.Add(newSuperAdmin);
+                _dbContext.SaveChanges();
+
+                _currentUser = newSuperAdmin;
+                SaveUserData(_currentUser);
+            }
+            else
+            {
+                _currentUser = superAdmin;
+                LoadUserData();
+                LanguageManager.CurrentLanguage = _currentUserData.Language;
+            }
 
             Text = LanguageManager.Get("car_service");
 
@@ -51,10 +87,11 @@ namespace WinForms.CarsService
             cbLang.DataSource = Enum.GetValues<LanguageManager.Language>();
             cbLang.Dock = DockStyle.Fill;
             cbLang.DropDownStyle = ComboBoxStyle.DropDownList;
+
             cbLang.BindingContextChanged += (sender, e) =>
             {
                 if (cbLang.Items.Count > 0)
-                    cbLang.SelectedIndex = (int)LanguageManager.CurrentLanguage;
+                    cbLang.SelectedIndex = (int)_currentUserData.Language;
             };
             cbLang.SelectedValueChanged += (sender, e) =>
             {

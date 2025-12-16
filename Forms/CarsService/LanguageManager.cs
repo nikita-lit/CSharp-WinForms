@@ -59,6 +59,7 @@
                         ["name"] = "Name",
                         ["price"] = "Price",
                         ["user_name"] = "Name",
+                        ["password"] = "Password",
                         ["role"] = "Role",
 
                         ["admin"] = "Admin",
@@ -76,8 +77,8 @@
                         ["car"] = "Auto",
                         ["services"] = "Teenused",
                         ["service"] = "Teenus",
-                        ["users"] = "Kasutaja",
-                        ["user"] = "Kasutajad",
+                        ["users"] = "Kasutajad",
+                        ["user"] = "Kasutaja",
                         ["add"] = "Lisa",
                         ["update"] = "Uuenda",
                         ["delete"] = "Kustuta",
@@ -99,6 +100,7 @@
                         ["name"] = "Nimi",
                         ["price"] = "Hind",
                         ["user_name"] = "Nimi",
+                        ["password"] = "Salasõna",
                         ["role"] = "Roll",
 
                         ["admin"] = "Admin",
@@ -139,6 +141,7 @@
                         ["name"] = "Название",
                         ["price"] = "Цена",
                         ["user_name"] = "Имя",
+                        ["password"] = "Пароль",
                         ["role"] = "Роль",
 
                         ["admin"] = "Администратор",

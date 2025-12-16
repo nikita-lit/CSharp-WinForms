@@ -34,11 +34,7 @@ namespace WinForms.CarsService
                 if (user != null)
                     OpenUserForm(user);
                 else
-                    MessageBox.Show(
-                        LanguageManager.Get("row_not_selected"),
-                        LanguageManager.Get("warning"),
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    MessageBox.Show(LanguageManager.Get("row_not_selected"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             };
 
             Panel spacer = new();
@@ -61,7 +57,7 @@ namespace WinForms.CarsService
             _tlpUsers.RowStyles.Clear();
             _tlpUsers.ColumnStyles.Clear();
 
-            string[] headers = { "id", "user_name", "role" };
+            string[] headers = { "id", "user_name", "password", "role" };
             _tlpUsers.ColumnCount = headers.Length;
 
             for (int i = 0; i < headers.Length; i++)
@@ -145,7 +141,8 @@ namespace WinForms.CarsService
 
                 _tlpUsers.Controls.Add(CreateLabel(user.Id.ToString(), row), 0, row + 1);
                 _tlpUsers.Controls.Add(CreateLabel(user.Name, row), 1, row + 1);
-                _tlpUsers.Controls.Add(CreateLabel(user.Role, row, true), 2, row + 1);
+                _tlpUsers.Controls.Add(CreateLabel(new string('*', user.Password.Length), row, true), 2, row + 1);
+                _tlpUsers.Controls.Add(CreateLabel(user.Role, row, true), 3, row + 1);
             }
         }
 
@@ -188,6 +185,17 @@ namespace WinForms.CarsService
                 txtName.Text = user.Name;
 
             //----------------------------------------
+            Label lblPassword = new();
+            lblPassword.Text = LanguageManager.Get("password") + ":";
+            lblPassword.Dock = DockStyle.Top;
+            lblPassword.ForeColor = Colors.Text;
+
+            TextBox txtPassword = new();
+            txtPassword.Dock = DockStyle.Top;
+            if (isUserValid)
+                txtPassword.Text = user.Password;
+
+            //----------------------------------------
             Label lblRole = new();
             lblRole.Text = LanguageManager.Get("role") + ":";
             lblRole.Dock = DockStyle.Top;
@@ -225,17 +233,19 @@ namespace WinForms.CarsService
                 var role = ((KeyValuePair<string, string>)cbRole.SelectedItem).Key;
                 bool isValid =
                     !string.IsNullOrWhiteSpace(txtName.Text) &&
+                    !string.IsNullOrWhiteSpace(txtPassword.Text) &&
                     !string.IsNullOrWhiteSpace(role);
 
                 if (isValid)
                 {
                     if (!isUserValid)
                     {
-                        _dbContext.Users.Add(new User { Name = txtName.Text, Role = role });
+                        _dbContext.Users.Add(new User { Name = txtName.Text, Role = role, Password = txtPassword.Text });
                     }
                     else
                     {
                         user.Name = txtName.Text;
+                        user.Password = txtPassword.Text;
                         user.Role = role;
                     }
 
@@ -251,6 +261,8 @@ namespace WinForms.CarsService
 
             _formAddUser.Controls.Add(cbRole);
             _formAddUser.Controls.Add(lblRole);
+            _formAddUser.Controls.Add(txtPassword);
+            _formAddUser.Controls.Add(lblPassword);
             _formAddUser.Controls.Add(txtName);
             _formAddUser.Controls.Add(lblName);
             _formAddUser.Controls.Add(but);
