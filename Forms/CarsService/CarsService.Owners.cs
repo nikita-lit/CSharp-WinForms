@@ -1,4 +1,5 @@
-﻿using WinForms.CarsService.Models;
+﻿using System;
+using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
 {
@@ -39,9 +40,35 @@ namespace WinForms.CarsService
             spacer.Height = 7;
             spacer.Dock = DockStyle.Top;
 
-            owners.Controls.Add(SetupButtonsPanel(add, update, butDeleteOwner_Click, LoadOwners));
+            var butPanel = SetupButtonsPanel(add, update, butDeleteOwner_Click, LoadOwners);
+            Button butViewOwnerCars = new();
+            butViewOwnerCars.Text = LanguageManager.Get("owner_cars");
+            butViewOwnerCars.Dock = DockStyle.Left;
+            butViewOwnerCars.AutoSize = true;
+            butViewOwnerCars.Click += (sender, e) =>
+            {
+                var owner = GetCurrentOwner();
+                if (owner != null)
+                    OpenOwnerCarsListForm(owner);
+                else
+                    MessageBox.Show(LanguageManager.Get("row_not_selected"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            };
+            SetupButtonStyle(butViewOwnerCars);
+
+            Panel spacer2 = new();
+            spacer2.Width = 5;
+            spacer2.Dock = DockStyle.Left;
+
+            butPanel.Controls.Add(spacer2);
+            butPanel.Controls.Add(butViewOwnerCars);
+
+            owners.Controls.Add(butPanel);
             owners.Controls.Add(spacer);
             owners.Controls.Add(panel);
+
+            LanguageManager.LanguageChanged += () => {
+                butViewOwnerCars.Text = LanguageManager.Get("owner_cars");
+            };
 
             LoadOwners();
         }
@@ -239,6 +266,97 @@ namespace WinForms.CarsService
             }
             else
                 MessageBox.Show(LanguageManager.Get("row_not_selected"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        private void OpenOwnerCarsListForm(Owner owner)
+        {
+            var cars = _dbContext.Cars
+                .Where(c => c.OwnerId == owner.Id)
+                .ToList();
+
+            Form form = new();
+            form.Text = $"{LanguageManager.Get("cars")} - {owner.FullName}";
+            form.Size = new Size(400, 300);
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.FormBorderStyle = FormBorderStyle.FixedSingle;
+            form.MaximizeBox = false;
+            form.MinimizeBox = false;
+            form.BackColor = Colors.Background;
+            MakeDark(form.Handle);
+
+            TableLayoutPanel tlpCars = new();
+            tlpCars.Dock = DockStyle.Fill;
+            tlpCars.AutoScroll = true;
+            tlpCars.ColumnCount = 1;
+            tlpCars.BackColor = Colors.Background;
+            tlpCars.ForeColor = Colors.Text;
+            tlpCars.Padding = new Padding(5);
+
+            tlpCars.Paint += (sender, e) =>
+            {
+                using Pen pen = new Pen(Colors.Header, 2);
+                e.Graphics.DrawRectangle(
+                    pen,
+                    new Rectangle(0, 0, tlpCars.Width - 2, tlpCars.Height - 2)
+                );
+            };
+
+            void AddCarRow(Car c)
+            {
+                Label lbl = new();
+                lbl.Text = $"{c.Brand} {c.Model} ({c.RegistrationNumber})";
+                lbl.ForeColor = Colors.Text;
+                lbl.BackColor = Colors.Row;
+                lbl.Padding = new Padding(5);
+                lbl.Dock = DockStyle.Top;
+                lbl.AutoSize = true;
+
+                lbl.Paint += (s, e) =>
+                {
+                    using Pen pen = new Pen(Colors.Header, 2);
+                    e.Graphics.DrawRectangle(
+                        pen,
+                        new Rectangle(0, 0, lbl.Width - 1, lbl.Height - 1)
+                    );
+                };
+
+                tlpCars.RowCount++;
+                tlpCars.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+                tlpCars.Controls.Add(lbl, 0, tlpCars.RowCount - 1);
+
+                ShowScrollBar(tlpCars.Handle, SB_BOTH, false);
+            }
+
+            if (cars.Count > 0)
+            {
+                Label lblCount = new();
+                lblCount.Text = LanguageManager.Get("cars") + ": " + cars.Count;
+                lblCount.ForeColor = Colors.Text;
+                lblCount.Dock = DockStyle.Top;
+                lblCount.TextAlign = ContentAlignment.MiddleCenter;
+                lblCount.Padding = new Padding(10);
+                lblCount.AutoSize = true;
+
+                form.Controls.Add(tlpCars);
+                form.Controls.Add(lblCount);
+
+                foreach (var c in cars)
+                    AddCarRow(c);
+            }
+            else
+            {
+                Label lblEmpty = new();
+                lblEmpty.Text = LanguageManager.Get("no_cars");
+                lblEmpty.ForeColor = Colors.Text;
+                lblEmpty.Dock = DockStyle.Top;
+                lblEmpty.TextAlign = ContentAlignment.MiddleCenter;
+                lblEmpty.Padding = new Padding(10);
+                lblEmpty.AutoSize = true;
+                lblEmpty.Font = new Font("Arial", 12, FontStyle.Bold);
+                form.Controls.Add(lblEmpty);
+            }
+
+            form.ShowDialog();
         }
     }
 }

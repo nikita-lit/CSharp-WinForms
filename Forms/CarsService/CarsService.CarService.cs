@@ -142,7 +142,7 @@ namespace WinForms.CarsService
                 }
 
                 var car = cs.Car;
-                _tlpCarServices.Controls.Add(Create($"{car.Brand} {car.Model} - {car.RegistrationNumber}", row), 0, row + 1);
+                _tlpCarServices.Controls.Add(Create($"{car.Brand} {car.Model} ({car.RegistrationNumber})", row), 0, row + 1);
                 _tlpCarServices.Controls.Add(Create(car.Owner.FullName, row), 1, row + 1);
                 _tlpCarServices.Controls.Add(Create(cs.Service.Name, row), 2, row + 1);
                 _tlpCarServices.Controls.Add(Create(cs.StartTime.ToString("dd.MM.yyyy HH:mm"), row), 3, row + 1);
@@ -203,7 +203,7 @@ namespace WinForms.CarsService
             if (isCarServiceValid)
             {
                 selectedCar = carService.Car;
-                txtCarSearch.Text = $"{selectedCar.Owner.FullName} - {selectedCar.Brand} {selectedCar.Model} - {selectedCar.RegistrationNumber}";
+                txtCarSearch.Text = $"{selectedCar.Owner.FullName} - {selectedCar.Brand} {selectedCar.Model} ({selectedCar.RegistrationNumber})";
             }
 
             TableLayoutPanel tlpCarResults = new();
@@ -224,7 +224,7 @@ namespace WinForms.CarsService
             void AddCarRow(Car c)
             {
                 Label lbl = new();
-                lbl.Text = $"{c.Owner.FullName} - {c.Brand} {c.Model} - {c.RegistrationNumber}";
+                lbl.Text = $"{c.Owner.FullName} - {c.Brand} {c.Model} ({c.RegistrationNumber})";
                 lbl.ForeColor = Colors.Text;
                 lbl.BackColor = Colors.Row;
                 lbl.Padding = new Padding(5);
@@ -235,7 +235,7 @@ namespace WinForms.CarsService
                 lbl.Click += (s, e) =>
                 {
                     selectedCar = c;
-                    txtCarSearch.Text = $"{c.Brand} {c.Model} - {c.RegistrationNumber}";
+                    txtCarSearch.Text = $"{c.Brand} {c.Model} ({c.RegistrationNumber})";
                     tlpCarResults.Visible = false;
                 };
 

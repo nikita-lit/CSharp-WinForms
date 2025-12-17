@@ -384,7 +384,7 @@ namespace WinForms.CarsService
             var car = GetCurrentCar();
             if (car != null)
             {
-                if (MessageBox.Show(LanguageManager.Get("are_you_sure"), LanguageManager.Get("warning"), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show(LanguageManager.Get("are_you_sure_car"), LanguageManager.Get("warning"), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     _dbContext.Cars.Remove(car);
                     _dbContext.SaveChanges();

@@ -235,7 +235,7 @@ namespace WinForms.CarsService
             var service = GetCurrentService();
             if (service != null)
             {
-                if (MessageBox.Show(LanguageManager.Get("are_you_sure"), LanguageManager.Get("warning"), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show(LanguageManager.Get("are_you_sure_service"), LanguageManager.Get("warning"), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     _dbContext.Services.Remove(service);
                     _dbContext.SaveChanges();
