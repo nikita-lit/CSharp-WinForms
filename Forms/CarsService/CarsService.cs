@@ -15,8 +15,9 @@ namespace WinForms.CarsService
         //  Запоминание выбранного языка между запусками. +
         // search +
 
-        // car service
+        // car service +
         //  Отображение общей выручки сервиса. +
+        //  Перевести перевод в .resx
         //  Уведомления о предстоящем обслуживании. (также расписание на неделю)
         //  Отображение количества автомобилей у владельца.
         //  Показ общей суммы обслуживания по автомобилю.
@@ -25,6 +26,8 @@ namespace WinForms.CarsService
         {
             Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Data"));
             Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Databases"));
+
+            LoadUserData();
 
             Text = LanguageManager.Get("car_service");
 
