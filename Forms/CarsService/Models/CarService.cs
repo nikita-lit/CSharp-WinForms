@@ -8,6 +8,7 @@
         public int ServiceId { get; set; }
         public Service Service { get; set; }
 
-        public DateTime DateOfService { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
     }
 }

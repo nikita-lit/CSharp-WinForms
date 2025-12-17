@@ -132,6 +132,8 @@ namespace WinForms.CarsService
                 _tlpServices.Controls.Add(CreateLabel(service.Name, row), 1, row + 1);
                 _tlpServices.Controls.Add(CreateLabel(service.Price.ToString() + " €", row), 2, row + 1);
             }
+
+            LoadCarServices();
         }
 
         private Service GetCurrentService()

@@ -11,8 +11,8 @@ using WinForms.CarsService;
 namespace WinForms.Migrations
 {
     [DbContext(typeof(CarsServiceDbContext))]
-    [Migration("20251216133649_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251217191848_CarsService")]
+    partial class CarsService
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,10 +53,13 @@ namespace WinForms.Migrations
                     b.Property<int>("ServiceId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("DateOfService")
+                    b.Property<DateTime>("StartTime")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("CarId", "ServiceId", "DateOfService");
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("CarId", "ServiceId", "StartTime");
 
                     b.HasIndex("ServiceId");
 
@@ -95,26 +98,6 @@ namespace WinForms.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Services");
-                });
-
-            modelBuilder.Entity("WinForms.CarsService.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Password")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Role")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("WinForms.CarsService.Models.Car", b =>

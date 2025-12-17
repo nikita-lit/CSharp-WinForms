@@ -136,6 +136,8 @@ namespace WinForms.CarsService
                 _tlpCars.Controls.Add(CreateLabel(car.RegistrationNumber.ToString(), row), 3, row + 1);
                 _tlpCars.Controls.Add(CreateLabel(car.Owner?.FullName ?? "", row), 4, row + 1);
             }
+
+            LoadCarServices();
         }
 
         private Car GetCurrentCar()
@@ -224,7 +226,7 @@ namespace WinForms.CarsService
             txtOwnerSearch.PlaceholderText = LanguageManager.Get("search_owner") + "...";
 
             Owner owner = null;
-            if (car != null)
+            if (isCarValid)
             {
                 owner = car.Owner;
                 txtOwnerSearch.Text = owner.FullName;
@@ -239,7 +241,8 @@ namespace WinForms.CarsService
             tlpOwnerResults.AutoScroll = true;
             tlpOwnerResults.ColumnCount = 1;
             tlpOwnerResults.Height = 150;
-            tlpOwnerResults.Paint += (sender, e) => {
+            tlpOwnerResults.Paint += (sender, e) => 
+            {
                 using (Pen pen = new Pen(Colors.Header, 2))
                     e.Graphics.DrawRectangle(pen, new Rectangle(0, 0, tlpOwnerResults.Width - 2, tlpOwnerResults.Height - 2));
             };
@@ -262,7 +265,8 @@ namespace WinForms.CarsService
                     tlpOwnerResults.Visible = false;
                 };
 
-                lbl.Paint += (sender, e) => {
+                lbl.Paint += (sender, e) => 
+                {
                     var but = sender as Button;
                     using (Pen pen = new Pen(Colors.Header, 2))
                         e.Graphics.DrawRectangle(pen, new Rectangle(0, 0, lbl.Width - 1, lbl.Height - 1));
@@ -286,9 +290,9 @@ namespace WinForms.CarsService
             txtOwnerSearch.TextChanged += (s, e) =>
             {
                 string text = txtOwnerSearch.Text.Trim().ToLower();
-
                 var results = _dbContext.Owners
-                    .Where(o => o.FullName.ToLower().Contains(text) || o.Phone.ToLower().Contains(text))
+                    .Where(o => o.FullName.ToLower().Contains(text) 
+                                || o.Phone.ToLower().Contains(text))
                     .ToList();
 
                 tlpOwnerResults.Controls.Clear();
@@ -298,7 +302,6 @@ namespace WinForms.CarsService
                 if (results.Count > 0)
                 {
                     tlpOwnerResults.Visible = true;
-
                     foreach (var o in results)
                         AddOwnerRow(o);
                 }

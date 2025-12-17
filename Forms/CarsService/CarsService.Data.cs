@@ -15,17 +15,12 @@ namespace WinForms.CarsService
     {
         public static string UserDataPath => Path.Combine(Program.GetDirectory(), "Data/car_service_user_data.json");
 
-        private void SaveUserData(User currentUser)
+        private void SaveUserData()
         {
-            if (currentUser == null)
-                return;
-
             try
             {
                 UserData data = new()
                 {
-                    Name = currentUser.Name,
-                    Password = currentUser.Password,
                     Language = LanguageManager.CurrentLanguage,
                 };
 
@@ -54,7 +49,7 @@ namespace WinForms.CarsService
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            SaveUserData(_currentUser);
+            SaveUserData();
         }
     }
 }

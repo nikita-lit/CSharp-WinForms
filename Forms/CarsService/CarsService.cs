@@ -10,61 +10,25 @@ namespace WinForms.CarsService
         public TabControl2 _tabControl;
 
         private UserData _currentUserData;
-        private User _currentUser;
 
         // multi lang +
-        //  Запоминание выбранного языка между запусками.
+        //  Запоминание выбранного языка между запусками. +
         // search +
-        // pdf - email
-        // Users
-        // Иконки и улучшенное оформление вкладок.
 
         // car service
-        //  Отображение общей выручки сервиса.
-        //  Уведомления о предстоящем обслуживании.
+        //  Отображение общей выручки сервиса. +
+        //  Уведомления о предстоящем обслуживании. (также расписание на неделю)
         //  Отображение количества автомобилей у владельца.
         //  Показ общей суммы обслуживания по автомобилю.
-
-        public User GetSuperAdmin()
-        {
-            var list = _dbContext.Users.Where(x => x.Name == "superadmin" && x.Role == "superadmin").ToList();
-            if (list.Count > 0)
-                return list.First();
-
-            return null;
-        }
 
         public CarsService()
         {
             Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Data"));
             Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Databases"));
 
-            var superAdmin = GetSuperAdmin();
-            if (superAdmin == null)
-            {
-                var newSuperAdmin = new User()
-                {
-                    Name = "superadmin",
-                    Password = "1234",
-                    Role = "superadmin",
-                };
-
-                _dbContext.Add(newSuperAdmin);
-                _dbContext.SaveChanges();
-
-                _currentUser = newSuperAdmin;
-                SaveUserData(_currentUser);
-            }
-            else
-            {
-                _currentUser = superAdmin;
-                LoadUserData();
-                LanguageManager.CurrentLanguage = _currentUserData.Language;
-            }
-
             Text = LanguageManager.Get("car_service");
 
-            Size = new Size(950, 550);
+            Size = new Size(1100, 550);
             BackColor = Colors.Background;
             Padding = new Padding(8);
 
@@ -124,11 +88,11 @@ namespace WinForms.CarsService
             SetupServicesTab(services);
             _tabControl.AddTab(services);
 
-            Panel users = new();
-            users.Text = "users";
-            users.BackColor = Colors.Background;
-            SetupUsersTab(users);
-            _tabControl.AddTab(users);
+            Panel carServices = new();
+            carServices.Text = "car_services";
+            carServices.BackColor = Colors.Background;
+            SetupCarServicesTab(carServices);
+            _tabControl.AddTab(carServices);
 
             MakeDark(Handle);
             Controls.Add(_tabControl);
@@ -179,7 +143,8 @@ namespace WinForms.CarsService
 
             panel.Controls.Add(butDelete);
             panel.Controls.Add(spacer);
-            panel.Controls.Add(butUpdate);
+            if (update != null)
+                panel.Controls.Add(butUpdate);
             panel.Controls.Add(spacer2);
             panel.Controls.Add(butAdd);
 

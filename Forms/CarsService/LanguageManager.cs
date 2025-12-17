@@ -48,7 +48,13 @@
                         ["warning"] = "Warning!",
                         ["language"] = "Language",
                         ["search_owner"] = "Search owner",
+                        ["search_car"] = "Search car",
+                        ["search_service"] = "Search service",
                         ["search"] = "Search",
+                        ["car_services"] = "Maintenance",
+                        ["total_revenue"] = "Total Revenue",
+                        ["car_owner"] = "Car owner",
+                        ["end_time_error"] = "The end time must be later than the start time.",
 
                         ["id"] = "ID",
                         ["fullname"] = "Full Name",
@@ -61,10 +67,8 @@
                         ["user_name"] = "Name",
                         ["password"] = "Password",
                         ["role"] = "Role",
-
-                        ["admin"] = "Admin",
-                        ["worker"] = "Worker",
-                        ["customer"] = "Customer",
+                        ["start_time"] = "Start Time",
+                        ["end_time"] = "End Time",
                     }
                 },
                 {
@@ -89,7 +93,13 @@
                         ["warning"] = "Hoiatus!",
                         ["language"] = "Keel",
                         ["search_owner"] = "Otsi omanikku",
+                        ["search_car"] = "Otsi autot",
+                        ["search_service"] = "Otsi teenust",
                         ["search"] = "Otsing",
+                        ["car_services"] = "Hooldus",
+                        ["total_revenue"] = "Kogutulu",
+                        ["car_owner"] = "Auto omanik",
+                        ["end_time_error"] = "Lõppaeg peab olema algusajast hilisem.",
 
                         ["id"] = "ID",
                         ["fullname"] = "Täisnimi",
@@ -102,10 +112,8 @@
                         ["user_name"] = "Nimi",
                         ["password"] = "Salasõna",
                         ["role"] = "Roll",
-
-                        ["admin"] = "Admin",
-                        ["worker"] = "Töötaja",
-                        ["customer"] = "Klient",
+                        ["start_time"] = "Algusaeg",
+                        ["end_time"] = "Lõppaeg",
                     }
                 },
                 {
@@ -129,8 +137,14 @@
                         ["are_you_sure_owner"] = "Вы уверены?\nУдаление владельца удалит его машины!",
                         ["warning"] = "Предупреждение!",
                         ["language"] = "Язык",
-                        ["search_owner"] = "Искать владелца",
+                        ["search_owner"] = "Поиск владелца",
+                        ["search_car"] = "Поиск машины",
+                        ["search_service"] = "Поиск услуги",
                         ["search"] = "Поиск",
+                        ["car_services"] = "Обслуживание",
+                        ["total_revenue"] = "Общий доход",
+                        ["car_owner"] = "Владелец машины",
+                        ["end_time_error"] = "Время окончания должно быть позже времени начала",
 
                         ["id"] = "ID",
                         ["fullname"] = "ФИО",
@@ -143,10 +157,8 @@
                         ["user_name"] = "Имя",
                         ["password"] = "Пароль",
                         ["role"] = "Роль",
-
-                        ["admin"] = "Администратор",
-                        ["worker"] = "Работник",
-                        ["customer"] = "Клиент",
+                        ["start_time"] = "Время начала",
+                        ["end_time"] = "Время конца",
                     }
                 }
             };

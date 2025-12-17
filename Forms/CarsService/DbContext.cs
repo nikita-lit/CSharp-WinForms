@@ -9,7 +9,6 @@ namespace WinForms.CarsService
         public DbSet<Car> Cars { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<CarService> CarServices { get; set; }
-        public DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -20,7 +19,7 @@ namespace WinForms.CarsService
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CarService>()
-                .HasKey(cs => new { cs.CarId, cs.ServiceId, cs.DateOfService });
+                .HasKey(cs => new { cs.CarId, cs.ServiceId, cs.StartTime });
 
             modelBuilder.Entity<Car>()
                 .HasOne(c => c.Owner)
@@ -36,8 +35,6 @@ namespace WinForms.CarsService
                 .HasOne(cs => cs.Service)
                 .WithMany(s => s.CarServices)
                 .HasForeignKey(cs => cs.ServiceId);
-
-            modelBuilder.Entity<User>();
         }
     }
 }
