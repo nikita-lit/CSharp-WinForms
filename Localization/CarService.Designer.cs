@@ -160,6 +160,15 @@ namespace WinForms.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Date.
+        /// </summary>
+        internal static string date {
+            get {
+                return ResourceManager.GetString("date", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         internal static string delete {
@@ -183,6 +192,15 @@ namespace WinForms.Localization {
         internal static string end_time_error {
             get {
                 return ResourceManager.GetString("end_time_error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Friday.
+        /// </summary>
+        internal static string friday {
+            get {
+                return ResourceManager.GetString("friday", resourceCulture);
             }
         }
         
@@ -228,6 +246,15 @@ namespace WinForms.Localization {
         internal static string model {
             get {
                 return ResourceManager.GetString("model", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Monday.
+        /// </summary>
+        internal static string monday {
+            get {
+                return ResourceManager.GetString("monday", resourceCulture);
             }
         }
         
@@ -331,6 +358,24 @@ namespace WinForms.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Saturday.
+        /// </summary>
+        internal static string saturday {
+            get {
+                return ResourceManager.GetString("saturday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Schedule.
+        /// </summary>
+        internal static string schedule {
+            get {
+                return ResourceManager.GetString("schedule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Search.
         /// </summary>
         internal static string search {
@@ -394,11 +439,56 @@ namespace WinForms.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sunday.
+        /// </summary>
+        internal static string sunday {
+            get {
+                return ResourceManager.GetString("sunday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Thursday.
+        /// </summary>
+        internal static string thursday {
+            get {
+                return ResourceManager.GetString("thursday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Time.
+        /// </summary>
+        internal static string time {
+            get {
+                return ResourceManager.GetString("time", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The selected time is already booked for another car..
+        /// </summary>
+        internal static string time_conflict {
+            get {
+                return ResourceManager.GetString("time_conflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Total Revenue.
         /// </summary>
         internal static string total_revenue {
             get {
                 return ResourceManager.GetString("total_revenue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tuesday.
+        /// </summary>
+        internal static string tuesday {
+            get {
+                return ResourceManager.GetString("tuesday", resourceCulture);
             }
         }
         
@@ -444,6 +534,15 @@ namespace WinForms.Localization {
         internal static string warning {
             get {
                 return ResourceManager.GetString("warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wednesday.
+        /// </summary>
+        internal static string wednesday {
+            get {
+                return ResourceManager.GetString("wednesday", resourceCulture);
             }
         }
     }

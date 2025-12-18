@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
 {
@@ -10,6 +9,8 @@ namespace WinForms.CarsService
 
     public partial class CarsService
     {
+        private UserData _currentUserData;
+
         public static string UserDataPath => Path.Combine(Program.GetDirectory(), "Data/car_service_user_data.json");
 
         private void SaveUserData()

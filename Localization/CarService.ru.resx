@@ -246,4 +246,37 @@
   <data name="end_time" xml:space="preserve">
     <value>Время конца</value>
   </data>
+  <data name="schedule" xml:space="preserve">
+    <value>Расписание</value>
+  </data>
+  <data name="time" xml:space="preserve">
+    <value>Время</value>
+  </data>
+  <data name="monday" xml:space="preserve">
+    <value>Понедельник</value>
+  </data>
+  <data name="tuesday" xml:space="preserve">
+    <value>Вторник</value>
+  </data>
+  <data name="wednesday" xml:space="preserve">
+    <value>Среда</value>
+  </data>
+  <data name="thursday" xml:space="preserve">
+    <value>Четверг</value>
+  </data>
+  <data name="friday" xml:space="preserve">
+    <value>Пятница</value>
+  </data>
+  <data name="saturday" xml:space="preserve">
+    <value>Суббота</value>
+  </data>
+  <data name="sunday" xml:space="preserve">
+    <value>Воскресенье</value>
+  </data>
+  <data name="date" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="time_conflict" xml:space="preserve">
+    <value>Выбранное время уже забронировано для другой машины.</value>
+  </data>
 </root>

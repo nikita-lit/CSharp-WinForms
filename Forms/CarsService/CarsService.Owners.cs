@@ -1,5 +1,4 @@
-﻿using System;
-using WinForms.CarsService.Models;
+﻿using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
 {
@@ -13,7 +12,7 @@ namespace WinForms.CarsService
         {
             ScrollableControl panel = new();
             panel.Dock = DockStyle.Top;
-            panel.Height = 300;
+            panel.Height = 400;
             panel.AutoScroll = true;
             panel.BackColor = Colors.TableBackground;
 

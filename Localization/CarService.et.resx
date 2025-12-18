@@ -246,4 +246,37 @@
   <data name="end_time" xml:space="preserve">
     <value>Lõppaeg</value>
   </data>
+  <data name="schedule" xml:space="preserve">
+    <value>Ajakava</value>
+  </data>
+  <data name="time" xml:space="preserve">
+    <value>Aeg</value>
+  </data>
+  <data name="monday" xml:space="preserve">
+    <value>Esmaspäev</value>
+  </data>
+  <data name="tuesday" xml:space="preserve">
+    <value>Teisipäev</value>
+  </data>
+  <data name="wednesday" xml:space="preserve">
+    <value>Kolmapäev</value>
+  </data>
+  <data name="thursday" xml:space="preserve">
+    <value>Neljapäev</value>
+  </data>
+  <data name="friday" xml:space="preserve">
+    <value>Reede</value>
+  </data>
+  <data name="saturday" xml:space="preserve">
+    <value>Laupäev</value>
+  </data>
+  <data name="sunday" xml:space="preserve">
+    <value>Pühapäev</value>
+  </data>
+  <data name="date" xml:space="preserve">
+    <value>Kuupäev</value>
+  </data>
+  <data name="time_conflict" xml:space="preserve">
+    <value>Valitud aeg on juba teisele autole broneeritud.</value>
+  </data>
 </root>

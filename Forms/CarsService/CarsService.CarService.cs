@@ -24,7 +24,7 @@ namespace WinForms.CarsService
 
             ScrollableControl panel = new();
             panel.Dock = DockStyle.Top;
-            panel.Height = 300;
+            panel.Height = 400;
             panel.AutoScroll = true;
             panel.BackColor = Colors.TableBackground;
             
@@ -151,6 +151,7 @@ namespace WinForms.CarsService
             }
              
             UpdateTotalRevenue();
+            LoadScheduleData();
         }
 
         private void UpdateTotalRevenue()
@@ -373,35 +374,40 @@ namespace WinForms.CarsService
             };
 
             //----------------------------------------
-            Label lblStart = new();
+            Label lblDate = new Label();
+            lblDate.Text = LanguageManager.Get("date") + ":";
+            lblDate.Dock = DockStyle.Top;
+            lblDate.ForeColor = Colors.Text;
+            lblDate.TextAlign = ContentAlignment.MiddleLeft;
+
+            DateTimePicker dtDate = new DateTimePicker();
+            dtDate.Dock = DockStyle.Top;
+            dtDate.Format = DateTimePickerFormat.Custom;
+            dtDate.CustomFormat = "dd.MM.yyyy";
+            dtDate.Value = DateTime.Today;
+
+            //----------------------------------------
+            Label lblStart = new Label();
             lblStart.Text = LanguageManager.Get("start_time") + ":";
             lblStart.Dock = DockStyle.Top;
             lblStart.ForeColor = Colors.Text;
             lblStart.TextAlign = ContentAlignment.MiddleLeft;
 
-            DateTimePicker dtStart = new();
+            DateTimePicker dtStart = new DateTimePicker();
             dtStart.Dock = DockStyle.Top;
             dtStart.Format = DateTimePickerFormat.Custom;
-            dtStart.CustomFormat = "dd.MM.yyyy HH:mm";
+            dtStart.CustomFormat = "HH:mm";
+            dtStart.Value = DateTime.Today.AddHours(START_HOUR);
 
-            //----------------------------------------
-            Label lblEnd = new();
-            lblEnd.Text = LanguageManager.Get("end_time") + ":";
-            lblEnd.Dock = DockStyle.Top;
-            lblEnd.ForeColor = Colors.Text;
-            lblEnd.TextAlign = ContentAlignment.MiddleLeft;
-
-            DateTimePicker dtEnd = new();
-            dtEnd.Dock = DockStyle.Top;
-            dtEnd.Format = DateTimePickerFormat.Custom;
-            dtEnd.CustomFormat = "dd.MM.yyyy HH:mm";
-
-            //----------------------------------------
-            if (isCarServiceValid)
+            dtStart.ValueChanged += (s, e) =>
             {
-                dtStart.Value = carService.StartTime;
-                dtEnd.Value = carService.EndTime;
-            }
+                if (dtStart.Value.Hour < START_HOUR)
+                    dtStart.Value = new DateTime(dtDate.Value.Year, dtDate.Value.Month, dtDate.Value.Day, START_HOUR, dtStart.Value.Minute, 0);
+                else if (dtStart.Value.Hour >= END_HOUR)
+                    dtStart.Value = new DateTime(dtDate.Value.Year, dtDate.Value.Month, dtDate.Value.Day, END_HOUR - 1, dtStart.Value.Minute, 0);
+                else
+                    dtStart.Value = new DateTime(dtDate.Value.Year, dtDate.Value.Month, dtDate.Value.Day, dtStart.Value.Hour, dtStart.Value.Minute, 0);
+            };
 
             //----------------------------------------
             Button but = new();
@@ -412,10 +418,18 @@ namespace WinForms.CarsService
 
             but.Click += (sender, e) =>
             {
+                DateTime date = dtDate.Value.Date;
+                TimeSpan startTime = dtStart.Value.TimeOfDay;
+
+                TimeSpan endTime = startTime.Add(TimeSpan.FromHours(1));
+
+                DateTime start = date + startTime;
+                DateTime end = date + endTime;
+
                 bool isValid = selectedService != null 
                                     && selectedCar != null;
 
-                if (dtEnd.Value <= dtStart.Value)
+                if (startTime >= endTime)
                 {
                     MessageBox.Show(LanguageManager.Get("end_time_error"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
@@ -426,22 +440,38 @@ namespace WinForms.CarsService
                     return;
                 }
 
+                bool hasConflict = _dbContext.CarServices
+                    .Any(cs => cs.StartTime < end && start < cs.EndTime);
+
+                if (hasConflict)
+                {
+                    MessageBox.Show(LanguageManager.Get("time_conflict"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 if (!isCarServiceValid)
                 {
-                    _dbContext.CarServices.Add(new CarService
+                    try
                     {
-                        CarId = selectedCar.Id,
-                        ServiceId = selectedService.Id,
-                        StartTime = dtStart.Value,
-                        EndTime = dtEnd.Value
-                    });
+                        _dbContext.CarServices.Add(new CarService
+                        {
+                            CarId = selectedCar.Id,
+                            ServiceId = selectedService.Id,
+                            StartTime = start,
+                            EndTime = end
+                        });
+                    }
+                    catch 
+                    {
+                        MessageBox.Show(LanguageManager.Get("invalid"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
                 else
                 {
                     carService.CarId = selectedCar.Id;
                     carService.ServiceId = selectedService.Id;
-                    carService.StartTime = dtStart.Value;
-                    carService.EndTime = dtEnd.Value;
+                    carService.StartTime = start;
+                    carService.EndTime = end;
                 }
 
                 _dbContext.SaveChanges();
@@ -450,10 +480,10 @@ namespace WinForms.CarsService
             };
 
             //----------------------------------------
-            _formAddCarService.Controls.Add(dtEnd);
-            _formAddCarService.Controls.Add(lblEnd);
             _formAddCarService.Controls.Add(dtStart);
             _formAddCarService.Controls.Add(lblStart);
+            _formAddCarService.Controls.Add(dtDate);
+            _formAddCarService.Controls.Add(lblDate);
             _formAddCarService.Controls.Add(tlpServiceResults);
             _formAddCarService.Controls.Add(txtServiceSearch);
             _formAddCarService.Controls.Add(lblService);

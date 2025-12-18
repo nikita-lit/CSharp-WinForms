@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
 using WinForms.CarsService.Elements;
-using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
 {
@@ -8,8 +7,6 @@ namespace WinForms.CarsService
     {
         public CarsServiceDbContext _dbContext = new();
         public TabControl2 _tabControl;
-
-        private UserData _currentUserData;
 
         // multi lang +
         //  Запоминание выбранного языка между запусками. +
@@ -29,8 +26,9 @@ namespace WinForms.CarsService
             LoadUserData();
 
             Text = LanguageManager.Get("car_service");
+            StartPosition = FormStartPosition.CenterScreen;
 
-            Size = new Size(1100, 550);
+            Size = new Size(1300, 800);
             BackColor = Colors.Background;
             Padding = new Padding(8);
 
@@ -95,6 +93,12 @@ namespace WinForms.CarsService
             carServices.BackColor = Colors.Background;
             SetupCarServicesTab(carServices);
             _tabControl.AddTab(carServices);
+
+            Panel schedule = new();
+            schedule.Text = "schedule";
+            schedule.BackColor = Colors.Background;
+            SetupScheduleTab(schedule);
+            _tabControl.AddTab(schedule);
 
             MakeDark(Handle);
             Controls.Add(_tabControl);
