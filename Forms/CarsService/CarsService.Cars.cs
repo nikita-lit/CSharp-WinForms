@@ -179,7 +179,7 @@ namespace WinForms.CarsService
 
             _formAddCar = new();
             _formAddCar.Text = $"{LanguageManager.Get("car_service")} - {t} {LanguageManager.Get("car")}";
-            _formAddCar.Size = new Size(270, 500);
+            _formAddCar.Size = new Size(300, 500);
             _formAddCar.Padding = new Padding(20);
             _formAddCar.FormBorderStyle = FormBorderStyle.FixedSingle;
             _formAddCar.MinimizeBox = false;

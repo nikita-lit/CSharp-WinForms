@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using WinForms.CarsService.Elements;
+using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
 {
@@ -7,16 +8,6 @@ namespace WinForms.CarsService
     {
         public CarsServiceDbContext _dbContext = new();
         public TabControl2 _tabControl;
-
-        // multi lang +
-        //  Запоминание выбранного языка между запусками. +
-        // search +
-
-        // car service +
-        //  Отображение общей выручки сервиса. +
-        //  Перевести перевод в .resx +
-        //  Уведомления о предстоящем обслуживании. (также расписание на неделю)
-        //  Отображение количества автомобилей у владельца. +
 
         public CarsService()
         {
@@ -194,6 +185,47 @@ namespace WinForms.CarsService
                 using (Pen pen = new Pen(Colors.Header, 1))
                     e.Graphics.DrawRectangle(pen, new Rectangle(1, 1, but.Width - 3, but.Height - 3));
             };
+        }
+
+        public void GenerateTestData()
+        {
+            var owners = new List<Owner>
+            {
+                new Owner { Id = 1, FullName = "Mati Kask", Phone = "+37251234567" },
+                new Owner { Id = 2, FullName = "Liis Tamm", Phone = "+37255678901" },
+                new Owner { Id = 3, FullName = "Kristjan Saar", Phone = "+37252345678" },
+                new Owner { Id = 4, FullName = "Anu Leht", Phone = "+37253456789" },
+                new Owner { Id = 5, FullName = "John", Phone = "+37254567890" }
+            };
+
+            var cars = new List<Car>
+            {
+                new Car { Id = 1, Brand = "Toyota", Model = "Corolla", RegistrationNumber = 1234, OwnerId = 1 },
+                new Car { Id = 2, Brand = "BMW", Model = "X5", RegistrationNumber = 5678, OwnerId = 2 },
+                new Car { Id = 3, Brand = "Audi", Model = "A4", RegistrationNumber = 9012, OwnerId = 3 },
+                new Car { Id = 4, Brand = "Volkswagen", Model = "Golf", RegistrationNumber = 3456, OwnerId = 4 },
+                new Car { Id = 5, Brand = "Mercedes", Model = "C200", RegistrationNumber = 7890, OwnerId = 5 },
+                new Car { Id = 6, Brand = "Honda", Model = "Civic", RegistrationNumber = 1122, OwnerId = 1 },
+                new Car { Id = 7, Brand = "Ford", Model = "Focus", RegistrationNumber = 3344, OwnerId = 2 },
+                new Car { Id = 8, Brand = "Nissan", Model = "Qashqai", RegistrationNumber = 5566, OwnerId = 3 },
+                new Car { Id = 9, Brand = "Kia", Model = "Ceed", RegistrationNumber = 7788, OwnerId = 4 },
+                new Car { Id = 10, Brand = "Skoda", Model = "Octavia", RegistrationNumber = 9900, OwnerId = 5 }
+            };
+
+            var services = new List<Service>
+            {
+                new Service { Id = 1, Name = "Õlivahetus", Price = 50f },
+                new Service { Id = 2, Name = "Pidurite kontroll", Price = 30f },
+                new Service { Id = 3, Name = "Rehvide vahetus", Price = 20f },
+                new Service { Id = 4, Name = "Aku kontroll", Price = 15f },
+                new Service { Id = 5, Name = "Mootori diagnostika", Price = 60f }
+            };
+
+            _dbContext.Owners.AddRange(owners);
+            _dbContext.Cars.AddRange(cars);
+            _dbContext.Services.AddRange(services);
+
+            _dbContext.SaveChanges();
         }
 
         public static void MakeDark(IntPtr hwnd)
