@@ -7,7 +7,7 @@ namespace WinForms.CarsService
 {
     public partial class CarsService : Form
     {
-        public CarsServiceDbContext _dbContext = new();
+        public CarsServiceManager Manager;
         public OwnerData OwnerData;
         public CarData CarData;
         public ServiceData ServiceData;
@@ -17,10 +17,11 @@ namespace WinForms.CarsService
 
         public CarsService()
         {
-            OwnerData = new OwnerData(_dbContext);
-            CarData = new CarData(_dbContext);
-            ServiceData = new ServiceData(_dbContext);
-            CarServiceData = new CarServiceData(_dbContext);
+            Manager = new CarsServiceManager();
+            OwnerData = Manager.OwnerData;
+            CarData = Manager.CarData;
+            ServiceData = Manager.ServiceData;
+            CarServiceData = Manager.CarServiceData;
 
             Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Data"));
             Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Databases"));
@@ -236,9 +237,7 @@ namespace WinForms.CarsService
             CarData.AddRange(cars);
             ServiceData.AddRange(services);
 
-            OwnerData.Save();
-            CarData.Save();
-            ServiceData.Save();
+            Manager.OwnerData.Save();
         }
 
         public static void MakeDark(IntPtr hwnd)

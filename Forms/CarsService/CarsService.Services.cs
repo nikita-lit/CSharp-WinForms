@@ -89,8 +89,7 @@ namespace WinForms.CarsService
                 _tlpServices.Controls.Add(lblHeader, i, 0);
             }
 
-            var services = _dbContext.Services
-                .Where(o => string.IsNullOrEmpty(search) ||
+            var services = ServiceData.Find(o => string.IsNullOrEmpty(search) ||
                             o.Name.ToLower().Contains(search.ToLower()) ||
                             o.Price.ToString().ToLower().Contains(search.ToLower()))
                 .ToList();
@@ -141,7 +140,7 @@ namespace WinForms.CarsService
         {
             if (_currentServiceRow >= 0)
             {
-                var services = _dbContext.Services.ToList();
+                var services = ServiceData.GetAll().ToList();
                 return services[_currentServiceRow];
             }
             return null;
@@ -206,14 +205,14 @@ namespace WinForms.CarsService
                 if (isValid)
                 {
                     if (!isServiceValid)
-                        _dbContext.Services.Add(new Service { Name = txtName.Text, Price = price });
+                        ServiceData.Add(new Service { Name = txtName.Text, Price = price });
                     else
                     {
                         service.Name = txtName.Text;
                         service.Price = price;
                     }
 
-                    _dbContext.SaveChanges();
+                    ServiceData.Save();
                     _formAddService.Close();
                     LoadServices();
                 }
