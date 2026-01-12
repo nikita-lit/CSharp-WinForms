@@ -1,4 +1,5 @@
-﻿using WinForms.CarsService.Models;
+﻿using WinForms.CarsService.DataAccess;
+using WinForms.CarsService.Models;
 
 namespace WinForms.CarsService
 {
@@ -237,8 +238,8 @@ namespace WinForms.CarsService
             {
                 if (MessageBox.Show(LanguageManager.Get("are_you_sure_service"), LanguageManager.Get("warning"), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    _dbContext.Services.Remove(service);
-                    _dbContext.SaveChanges();
+                    ServiceData.Remove(service);
+                    ServiceData.Save();
                     LoadServices();
                 }
             }

@@ -99,13 +99,19 @@ namespace WinForms.CarsService
                 _tlpCarServices.Controls.Add(lblHeader, i, 0);
             }
 
-            var carServices = _dbContext.CarServices
-                .Where(o => string.IsNullOrEmpty(search) ||
-                            o.Service.Name.ToLower().Contains(search.ToLower()) ||
-                            o.Car.Brand.ToLower().Contains(search.ToLower()) ||
-                            o.Car.Model.ToLower().Contains(search.ToLower()) ||
-                            o.Car.Owner.FullName.ToLower().Contains(search.ToLower()))
-                .ToList();
+            List<CarService> carServices;
+            if (string.IsNullOrEmpty(search))
+                carServices = CarServiceData.GetAll().ToList();
+            else
+            {
+                var s = search.ToLower();
+                carServices = CarServiceData.Find(o =>
+                    o.Service.Name.ToLower().Contains(s) ||
+                    o.Car.Brand.ToLower().Contains(s) ||
+                    o.Car.Model.ToLower().Contains(s) ||
+                    o.Car.Owner.FullName.ToLower().Contains(s)
+                ).ToList();
+            }
 
             _tlpCarServices.RowCount = carServices.Count + 1;
             for (int row = 0; row < carServices.Count; row++)
@@ -156,10 +162,7 @@ namespace WinForms.CarsService
 
         private void UpdateTotalRevenue()
         {
-            float total = _dbContext.CarServices
-                .Include(x => x.Service)
-                .Sum(x => x.Service.Price);
-
+            float total = CarServiceData.GetAll().Sum(x => x.Service.Price);
             _lblTotalRevenue.Text = LanguageManager.Get("total_revenue") + ": " + Math.Round(total, 2) + " €";
         }
 
@@ -167,7 +170,7 @@ namespace WinForms.CarsService
         {
             if (_currentCarServiceRow >= 0)
             {
-                var carServices = _dbContext.CarServices.ToList();
+                var carServices = CarServiceData.GetAll().ToList();
                 return carServices[_currentCarServiceRow];
             }
             return null;
@@ -254,7 +257,7 @@ namespace WinForms.CarsService
                 ShowScrollBar(tlpCarResults.Handle, SB_BOTH, false);
             }
 
-            var cars = _dbContext.Cars.ToList();
+            var cars = CarData.GetAll().ToList();
             if (selectedCar == null && cars.Count > 0)
             {
                 tlpCarResults.Visible = true;
@@ -265,12 +268,10 @@ namespace WinForms.CarsService
             txtCarSearch.TextChanged += (s, e) =>
             {
                 string text = txtCarSearch.Text.Trim().ToLower();
-                var results = _dbContext.Cars
-                    .Where(c => c.Model.ToLower().Contains(text)
+                var results = CarData.Find(c => c.Model.ToLower().Contains(text)
                              || c.Brand.ToLower().Contains(text)
                              || c.RegistrationNumber.ToString().ToLower().Contains(text)
-                             || c.Owner.FullName.ToLower().Contains(text))
-                    .ToList();
+                             || (c.Owner != null && c.Owner.FullName.ToLower().Contains(text))).ToList();
 
                 tlpCarResults.Controls.Clear();
                 tlpCarResults.RowStyles.Clear();
@@ -344,7 +345,7 @@ namespace WinForms.CarsService
                 ShowScrollBar(tlpServiceResults.Handle, SB_BOTH, false);
             }
 
-            var services = _dbContext.Services.ToList();
+            var services = ServiceData.GetAll().ToList();
             if (selectedService == null && services.Count > 0)
             {
                 tlpServiceResults.Visible = true;
@@ -355,9 +356,7 @@ namespace WinForms.CarsService
             txtServiceSearch.TextChanged += (s, e) =>
             {
                 string text = txtServiceSearch.Text.Trim().ToLower();
-                var results = _dbContext.Services
-                    .Where(s => s.Name.ToLower().Contains(text))
-                    .ToList();
+                var results = ServiceData.Find(s => s.Name.ToLower().Contains(text)).ToList();
 
                 tlpServiceResults.Controls.Clear();
                 tlpServiceResults.RowStyles.Clear();
@@ -440,8 +439,7 @@ namespace WinForms.CarsService
                     return;
                 }
 
-                bool hasConflict = _dbContext.CarServices
-                    .Any(cs => cs.StartTime < end && start < cs.EndTime);
+                bool hasConflict = CarServiceData.HasConflict(start, end);
 
                 if (hasConflict)
                 {
@@ -453,15 +451,16 @@ namespace WinForms.CarsService
                 {
                     try
                     {
-                        _dbContext.CarServices.Add(new CarService
+                        CarServiceData.Add(new CarService
                         {
                             CarId = selectedCar.Id,
                             ServiceId = selectedService.Id,
                             StartTime = start,
                             EndTime = end
                         });
+                        CarServiceData.Save();
                     }
-                    catch 
+                    catch
                     {
                         MessageBox.Show(LanguageManager.Get("invalid"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
@@ -472,9 +471,9 @@ namespace WinForms.CarsService
                     carService.ServiceId = selectedService.Id;
                     carService.StartTime = start;
                     carService.EndTime = end;
+                    CarServiceData.Save();
                 }
 
-                _dbContext.SaveChanges();
                 _formAddCarService.Close();
                 LoadCarServices();
             };
@@ -502,8 +501,8 @@ namespace WinForms.CarsService
             {
                 if (MessageBox.Show(LanguageManager.Get("are_you_sure"), LanguageManager.Get("warning"), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    _dbContext.CarServices.Remove(carService);
-                    _dbContext.SaveChanges();
+                    CarServiceData.Remove(carService);
+                    CarServiceData.Save();
                     LoadCarServices();
                 }
             }

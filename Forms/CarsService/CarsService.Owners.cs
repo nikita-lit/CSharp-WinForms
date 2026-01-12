@@ -114,11 +114,14 @@ namespace WinForms.CarsService
                 _tlpOwners.Controls.Add(lblHeader, i, 0);
             }
 
-            var owners = _dbContext.Owners
-                .Where(o => string.IsNullOrEmpty(search) ||
-                            o.FullName.ToLower().Contains(search.ToLower()) ||
-                            o.Phone.ToLower().Contains(search.ToLower()))
-                .ToList();
+            List<Owner> owners;
+            if (string.IsNullOrEmpty(search))
+                owners = OwnerData.GetAll().ToList();
+            else
+            {
+                var s = search.ToLower();
+                owners = OwnerData.Find(o => o.FullName.ToLower().Contains(s) || o.Phone.ToLower().Contains(s)).ToList();
+            }
 
             _tlpOwners.RowCount = owners.Count + 1;
             for (int row = 0; row < owners.Count; row++)
@@ -166,7 +169,7 @@ namespace WinForms.CarsService
         {
             if (_currentOwnerRow >= 0)
             {
-                var owners = _dbContext.Owners.ToList();
+                var owners = OwnerData.GetAll().ToList();
                 return owners[_currentOwnerRow];
             }
             return null;
@@ -225,17 +228,25 @@ namespace WinForms.CarsService
 
                 if (isValid)
                 {
-                    if (!isOwnerValid)
-                        _dbContext.Owners.Add(new Owner { FullName = txtOwnerName.Text, Phone = txtOwnerPhone.Text });
-                    else
+                    try
                     {
-                        owner.FullName = txtOwnerName.Text;
-                        owner.Phone =txtOwnerPhone.Text;
-                    }
+                        if (!isOwnerValid)
+                            OwnerData.Add(new Owner { FullName = txtOwnerName.Text, Phone = txtOwnerPhone.Text });
+                        else
+                        {
+                            owner.FullName = txtOwnerName.Text;
+                            owner.Phone = txtOwnerPhone.Text;
+                            OwnerData.Update(owner);
+                        }
 
-                    _dbContext.SaveChanges();
-                    _formAddOwner.Close();
-                    LoadOwners();
+                        OwnerData.Save();
+                        _formAddOwner.Close();
+                        LoadOwners();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, LanguageManager.Get("error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
                 else
                     MessageBox.Show(LanguageManager.Get("invalid"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -258,8 +269,8 @@ namespace WinForms.CarsService
             {
                 if (MessageBox.Show(LanguageManager.Get("are_you_sure_owner"), LanguageManager.Get("warning"), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    _dbContext.Owners.Remove(owner);
-                    _dbContext.SaveChanges();
+                    OwnerData.Remove(owner);
+                    OwnerData.Save();
                     LoadOwners();
                 }
             }
@@ -269,9 +280,7 @@ namespace WinForms.CarsService
 
         private void OpenOwnerCarsListForm(Owner owner)
         {
-            var cars = _dbContext.Cars
-                .Where(c => c.OwnerId == owner.Id)
-                .ToList();
+            var cars = CarData.Find(c => c.OwnerId == owner.Id).ToList();
 
             Form form = new();
             form.Text = $"{LanguageManager.Get("cars")} - {owner.FullName}";

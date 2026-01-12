@@ -87,7 +87,7 @@ namespace WinForms.CarsService
                 }
             }
 
-            foreach (var cs in _dbContext.CarServices)
+            foreach (var cs in CarServiceData.GetAll())
             {
                 if (cs.StartTime < _weekStart ||
                     cs.StartTime >= _weekStart.AddDays(7))

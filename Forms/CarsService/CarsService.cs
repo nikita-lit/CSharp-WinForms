@@ -236,7 +236,9 @@ namespace WinForms.CarsService
             CarData.AddRange(cars);
             ServiceData.AddRange(services);
 
-            _dbContext.SaveChanges();
+            OwnerData.Save();
+            CarData.Save();
+            ServiceData.Save();
         }
 
         public static void MakeDark(IntPtr hwnd)

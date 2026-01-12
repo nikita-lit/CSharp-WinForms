@@ -88,13 +88,19 @@ namespace WinForms.CarsService
                 _tlpCars.Controls.Add(lblHeader, i, 0);
             }
 
-            var cars = _dbContext.Cars
-                .Where(o => string.IsNullOrEmpty(search) ||
-                            o.Model.ToLower().Contains(search.ToLower()) ||
-                            o.Brand.ToLower().Contains(search.ToLower()) ||
-                            o.Owner.FullName.ToLower().Contains(search.ToLower()) ||
-                            o.RegistrationNumber.ToString().ToLower().Contains(search.ToLower()))
-                .ToList();
+            List<Car> cars;
+            if (string.IsNullOrEmpty(search))
+                cars = CarData.GetAll().ToList();
+            else
+            {
+                var s = search.ToLower();
+                cars = CarData.Find(o =>
+                    o.Model.ToLower().Contains(s) ||
+                    o.Brand.ToLower().Contains(s) ||
+                    (o.Owner != null && o.Owner.FullName.ToLower().Contains(s)) ||
+                    o.RegistrationNumber.ToString().ToLower().Contains(s)
+                ).ToList();
+            }
 
             _tlpCars.RowCount = cars.Count + 1;
             for (int row = 0; row < cars.Count; row++)
@@ -144,7 +150,7 @@ namespace WinForms.CarsService
         {
             if (_currentCarRow >= 0)
             {
-                var cars = _dbContext.Cars.ToList();
+                var cars = CarData.GetAll().ToList();
                 return cars[_currentCarRow];
             }
             return null;
@@ -279,7 +285,7 @@ namespace WinForms.CarsService
                 ShowScrollBar(tlpOwnerResults.Handle, SB_BOTH, false);
             }
 
-            var owners = _dbContext.Owners;
+            var owners = OwnerData.GetAll();
             if (owner == null && owners.Count() > 0)
             {
                 tlpOwnerResults.Visible = true;
@@ -290,10 +296,7 @@ namespace WinForms.CarsService
             txtOwnerSearch.TextChanged += (s, e) =>
             {
                 string text = txtOwnerSearch.Text.Trim().ToLower();
-                var results = _dbContext.Owners
-                    .Where(o => o.FullName.ToLower().Contains(text) 
-                                || o.Phone.ToLower().Contains(text))
-                    .ToList();
+                var results = OwnerData.Find(o => o.FullName.ToLower().Contains(text) || o.Phone.ToLower().Contains(text)).ToList();
 
                 tlpOwnerResults.Controls.Clear();
                 tlpOwnerResults.RowStyles.Clear();
@@ -342,20 +345,28 @@ namespace WinForms.CarsService
 
                 if (isValid)
                 {
-                    if (!isCarValid)
-                        _dbContext.Cars.Add(new Car { Brand = brand, Model = model, RegistrationNumber = regNum, OwnerId = owner.Id });
-                    else
+                    try
                     {
-                        car.Brand = brand;
-                        car.Model = model;
-                        car.RegistrationNumber = regNum;
-                        car.OwnerId = owner.Id;
-                        car.Owner = owner;
-                    }
+                        if (!isCarValid)
+                            CarData.Add(new Car { Brand = brand, Model = model, RegistrationNumber = regNum, OwnerId = owner.Id });
+                        else
+                        {
+                            car.Brand = brand;
+                            car.Model = model;
+                            car.RegistrationNumber = regNum;
+                            car.OwnerId = owner.Id;
+                            car.Owner = owner;
+                            CarData.Update(car);
+                        }
 
-                    _dbContext.SaveChanges();
-                    _formAddCar.Close();
-                    LoadCars();
+                        CarData.Save();
+                        _formAddCar.Close();
+                        LoadCars();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, LanguageManager.Get("error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
                 else
                     MessageBox.Show(LanguageManager.Get("invalid"), LanguageManager.Get("warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -386,8 +397,8 @@ namespace WinForms.CarsService
             {
                 if (MessageBox.Show(LanguageManager.Get("are_you_sure_car"), LanguageManager.Get("warning"), MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    _dbContext.Cars.Remove(car);
-                    _dbContext.SaveChanges();
+                    CarData.Remove(car);
+                    CarData.Save();
                     LoadCars();
                 }
             }
