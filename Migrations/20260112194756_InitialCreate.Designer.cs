@@ -11,8 +11,8 @@ using WinForms.CarsService;
 namespace WinForms.Migrations
 {
     [DbContext(typeof(CarsServiceDbContext))]
-    [Migration("20251217191848_CarsService")]
-    partial class CarsService
+    [Migration("20260112194756_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

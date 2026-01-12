@@ -1,16 +1,27 @@
 ﻿using System.Runtime.InteropServices;
 using WinForms.CarsService.Elements;
 using WinForms.CarsService.Models;
+using WinForms.CarsService.DataAccess;
 
 namespace WinForms.CarsService
 {
     public partial class CarsService : Form
     {
         public CarsServiceDbContext _dbContext = new();
+        public OwnerData OwnerData;
+        public CarData CarData;
+        public ServiceData ServiceData;
+        public CarServiceData CarServiceData;
+
         public TabControl2 _tabControl;
 
         public CarsService()
         {
+            OwnerData = new OwnerData(_dbContext);
+            CarData = new CarData(_dbContext);
+            ServiceData = new ServiceData(_dbContext);
+            CarServiceData = new CarServiceData(_dbContext);
+
             Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Data"));
             Directory.CreateDirectory(Path.Combine(Program.GetDirectory(), "Databases"));
 
@@ -221,9 +232,9 @@ namespace WinForms.CarsService
                 new Service { Id = 5, Name = "Mootori diagnostika", Price = 60f }
             };
 
-            _dbContext.Owners.AddRange(owners);
-            _dbContext.Cars.AddRange(cars);
-            _dbContext.Services.AddRange(services);
+            OwnerData.AddRange(owners);
+            CarData.AddRange(cars);
+            ServiceData.AddRange(services);
 
             _dbContext.SaveChanges();
         }
