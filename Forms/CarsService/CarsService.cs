@@ -238,6 +238,8 @@ namespace WinForms.CarsService
             ServiceData.AddRange(services);
 
             Manager.OwnerData.Save();
+            Manager.CarData.Save();
+            Manager.ServiceData.Save();
         }
 
         public static void MakeDark(IntPtr hwnd)

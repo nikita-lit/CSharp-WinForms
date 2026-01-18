@@ -11,7 +11,7 @@ using WinForms.CarsService;
 namespace WinForms.Migrations
 {
     [DbContext(typeof(CarsServiceDbContext))]
-    [Migration("20260112194756_InitialCreate")]
+    [Migration("20260118163921_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
