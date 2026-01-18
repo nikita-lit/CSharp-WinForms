@@ -1,6 +1,4 @@
-using WinForms.CarsService.DataAccess;
-
-namespace WinForms.CarsService
+namespace WinForms.CarsService.DataAccess
 {
     public class CarsServiceManager
     {
